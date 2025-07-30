@@ -18,6 +18,7 @@ doPlotHists = 0;
 appendFastFlops = 0;
 plotFourSample = 1;
 plotNonMarkov = 1;
+plotSimpleRates = 1;
 numBins = 20;
 
 doPlotTraces = 0; % Plot a Selection of Traces?
@@ -31,7 +32,7 @@ dualData = {'0_0' '0_10' '30_0' '30_10';...
     [], [], [],[]; % Right (Cy3) Path [4] 
     [], [], [],[]; % Right (Cy3) Raw "FRET" [5] 
     [], [], [],[]}; % Three State [6]
-numDualSamples = size(dualData, 2);
+numSamples = size(dualData, 2);
 dualNames = ["0_0", "0_10", "30_0", "30_10"];
 for i=1:length(dualNames)
     simpleDualDwells(i).name = dualNames(i);
@@ -39,10 +40,10 @@ for i=1:length(dualNames)
 end
 
 outsideBoxSpecs = [0.68 0.15 0.3 0.16];
-insideBoxSpecs = [0.600833333333333 0.145 0.182500000000002 0.11];
+insideBoxSpecs = [0.601666666666666 0.13 0.182500000000002 0.0875];
 foursampleOutsideBox = [0.814166666666669 0.14 0.181666666666676 0.21875];
 foursampleLegendSpecs = [0.821483335655433 0.466562506705523 0.162499995355805 0.459374986588955];
-twosampleLegendSpecs = [0.619816668988765 0.272187503967434 0.162499995355805 0.278124992065133];
+twosampleLegendSpecs = [0.614816668988766 0.239687503967434 0.162499995355805 0.278124992065133];
 
 old0_0exclude = [7, 21, 24, 49, 50, 53, 56];
 
@@ -137,7 +138,7 @@ if doSliderPlot
 end
 
 if doPlotTraces
-    for sample = 1:numDualSamples
+    for sample = 1:numSamples
         for trace = plotTraces{:,sample}
             leftQuenchHMMSubset = dualData{2, sample};
             leftQuenchRawSubset = dualData{3, sample};
@@ -232,8 +233,8 @@ end
 if plotDwellScatter
     % Simple Dual Avg. Dwell Times
     simpleDualAvgDwells = figure('Position', [10 100 1900 900]);
-    for i=1:numDualSamples
-        subplot(2,numDualSamples,i*2-1)
+    for i=1:numSamples
+        subplot(2,numSamples,i*2-1)
         scatter(simpleDualDwells(i).leftMeanTlow, simpleDualDwells(i).leftMeanThigh, 'LineWidth',2)
         grid on
         xlabel('Mean Low Dwell Time (s)')
@@ -243,7 +244,7 @@ if plotDwellScatter
         title(strcat(simpleDualDwells(i).name, " Left"), 'Interpreter','none')
         set(gca,'fontweight','bold', 'FontSize', 14)
     
-        subplot(2,numDualSamples,i*2)
+        subplot(2,numSamples,i*2)
         scatter(simpleDualDwells(i).rightMeanTlow, simpleDualDwells(i).rightMeanThigh, 'LineWidth',2)
         grid on
         xlabel('Mean Low Dwell Time (s)')
@@ -306,9 +307,9 @@ if doPlotHists
     % bins = 0:1:max(singleLeftTlow(1, :));
      % Simple Dual Avg. Dwell Times
     simpleDualAvgDwells = figure('Position', [10 100 1900 900]);
-    for i=1:numDualSamples
+    for i=1:numSamples
         bins = 0:1:max(simpleDualDwells(i).leftLow(1, :));
-        subplot(2,numDualSamples,i*2-1)
+        subplot(2,numSamples,i*2-1)
         histogram(simpleDualDwells(i).leftLow, bins)
         grid on
         xlabel('Mean Low Dwell Time (s)')
@@ -318,7 +319,7 @@ if doPlotHists
         title(strcat(simpleDualDwells(i).name, " Left"), 'Interpreter','none')
         set(gca,'fontweight','bold', 'FontSize', 14)
     
-        subplot(2,numDualSamples,i*2)
+        subplot(2,numSamples,i*2)
         scatter(simpleDualDwells(i).rightMeanTlow, simpleDualDwells(i).rightMeanThigh, 'LineWidth',2)
         grid on
         xlabel('Mean Low Dwell Time (s)')
@@ -398,57 +399,59 @@ if plotGroupOneSample
 end
 
 if plotFourSample
-    % Binding
-    cmap = linspecer(4);
-    fourSingleFitParams = {singleFitParams; singleFitParams; singleFitParams; singleFitParams};
-    fourMarkers = {'ks', 'ko', 'k*', 'kx'};
-    numSamples = size(threeStateDwells, 2);
-    plotDwells = cell(numSamples, 1);
-    names = cell(numSamples, 1);
-    for i = 1:numSamples
-        plotDwells{i} = threeStateDwells(i).middleLeftDwells(1, :);
-        names{i} = threeStateDwells(i).name{1};
-    end
-    plotNSingleCutoff(plotDwells, cutoffFraction, fourSingleFitParams, names, cmap,...
-        fourMarkers, foursampleOutsideBox,foursampleLegendSpecs, "Left Time to Bind")
-    xlim([0 15])
-    ylim([1e-2 1])
-    saveas(gcf, strcat('Brushes Left Time to Bind', ".png"))
-    
-    plotDwells = cell(numSamples, 1);
-    names = cell(numSamples, 1);
-    for i = 1:numSamples
-        plotDwells{i} = threeStateDwells(i).middleRightDwells(1, :);
-        names{i} = threeStateDwells(i).name{1};
-    end
-    plotNSingleCutoff(plotDwells, cutoffFraction, fourSingleFitParams, names, cmap,...
-        fourMarkers, foursampleOutsideBox,foursampleLegendSpecs, "Right Time to Bind")
-    xlim([0 15])
-    ylim([1e-2 1])
-    saveas(gcf, strcat('Brushes Right Time to Bind', ".png"))
+    if plotSimpleRates
+        % Binding
+        cmap = linspecer(4);
+        fourSingleFitParams = {singleFitParams; singleFitParams; singleFitParams; singleFitParams};
+        fourMarkers = {'ks', 'ko', 'k*', 'kx'};
+        numSamples = size(threeStateDwells, 2);
+        plotDwells = cell(numSamples, 1);
+        names = cell(numSamples, 1);
+        for i = 1:numSamples
+            plotDwells{i} = threeStateDwells(i).middleLeftDwells(1, :);
+            names{i} = threeStateDwells(i).name{1};
+        end
+        plotNSingleCutoff(plotDwells, cutoffFraction, fourSingleFitParams, names, cmap,...
+            fourMarkers, foursampleOutsideBox,foursampleLegendSpecs, "Left Time to Bind")
+        xlim([0 15])
+        ylim([1e-2 1])
+        saveas(gcf, strcat('plotRates/', 'Brushes Left Time to Bind', ".png"))
+        
+        plotDwells = cell(numSamples, 1);
+        names = cell(numSamples, 1);
+        for i = 1:numSamples
+            plotDwells{i} = threeStateDwells(i).middleRightDwells(1, :);
+            names{i} = threeStateDwells(i).name{1};
+        end
+        plotNSingleCutoff(plotDwells, cutoffFraction, fourSingleFitParams, names, cmap,...
+            fourMarkers, foursampleOutsideBox,foursampleLegendSpecs, "Right Time to Bind")
+        xlim([0 15])
+        ylim([1e-2 1])
+        saveas(gcf, strcat('plotRates/', 'Brushes Right Time to Bind', ".png"))
 
-    % Dissociation
-    for i = 1:numSamples
-        plotDwells{i} = threeStateDwells(i).leftDwells(1, :);
-        names{i} = threeStateDwells(i).name{1};
-    end
-    plotNSingleCutoff(plotDwells, cutoffFraction, fourSingleFitParams, names, cmap,...
-        fourMarkers, foursampleOutsideBox,foursampleLegendSpecs, "Left Time to Dissociate")
-    xlim([0 15])
-    ylim([1e-2 1])
-    saveas(gcf, strcat('Brushes Left Time to Dissociate', ".png"))
+        % Dissociation
+        for i = 1:numSamples
+            plotDwells{i} = threeStateDwells(i).leftDwells(1, :);
+            names{i} = threeStateDwells(i).name{1};
+        end
+        plotNSingleCutoff(plotDwells, cutoffFraction, fourSingleFitParams, names, cmap,...
+            fourMarkers, foursampleOutsideBox,foursampleLegendSpecs, "Left Time to Dissociate")
+        xlim([0 15])
+        ylim([1e-2 1])
+        saveas(gcf, strcat('plotRates/', 'Brushes Left Time to Dissociate', ".png"))
 
-    plotDwells = cell(numSamples, 1);
-    names = cell(numSamples, 1);
-    for i = 1:numSamples
-        plotDwells{i} = threeStateDwells(i).rightDwells(1, :);
-        names{i} = threeStateDwells(i).name{1};
+        plotDwells = cell(numSamples, 1);
+        names = cell(numSamples, 1);
+        for i = 1:numSamples
+            plotDwells{i} = threeStateDwells(i).rightDwells(1, :);
+            names{i} = threeStateDwells(i).name{1};
+        end
+        plotNSingleCutoff(plotDwells, cutoffFraction, fourSingleFitParams, names, cmap,...
+            fourMarkers, foursampleOutsideBox,foursampleLegendSpecs, "Right Time to Dissociate")
+        xlim([0 15])
+        ylim([1e-2 1])
+        saveas(gcf, strcat('plotRates/', 'Brushes Right Time to Dissociate', ".png"))
     end
-    plotNSingleCutoff(plotDwells, cutoffFraction, fourSingleFitParams, names, cmap,...
-        fourMarkers, foursampleOutsideBox,foursampleLegendSpecs, "Right Time to Dissociate")
-    xlim([0 15])
-    ylim([1e-2 1])
-    saveas(gcf, strcat('Brushes Right Time to Dissociate', ".png"))
     if plotNonMarkov
         for sample = 1:numSamples
             % Plot Left Markov
@@ -457,10 +460,10 @@ if plotFourSample
             names = {'$K_{LUL}$', '$K_{RUL}$'};
             twoMarkers = {'ks', 'ko'};
             plotDwells = {threeStateDwells(sample).middleLeftRebindDwells(1, :), threeStateDwells(sample).middleRightLeftTransitionDwells(1, :)};
-            plotNSingleCutoff(plotDwells, cutoffFraction, twoSingleFitParams, names, cmap, twoMarkers, insideBoxSpecs, twosampleLegendSpecs, strcat(threeStateDwells(sample).name, 'Left Complex Rates'))
-            ylim([3e-3 1])
-            xlim([0 5])
-            saveas(gcf, strcat(threeStateDwells(sample).name, 'Left Complex Rates', ".png"))
+            plotNSingleCutoff(plotDwells, cutoffFraction, twoSingleFitParams, names, cmap, twoMarkers, foursampleOutsideBox, foursampleLegendSpecs, strcat(threeStateDwells(sample).name, ' Left Complex Rates'))
+            ylim([1e-2 1])
+            xlim([0 15])
+            saveas(gcf, strcat('plotRates/complexRates/', threeStateDwells(sample).name, 'Left Complex Rates', ".png"))
         
             % Plot Right Markov
             cmap = linspecer(2);
@@ -468,10 +471,10 @@ if plotFourSample
             names = {'$K_{RUR}$', '$K_{LUR}$'};
             twoMarkers = {'ks', 'ko'};
             plotDwells = {threeStateDwells(sample).middleRightRebindDwells(1, :), threeStateDwells(sample).middleLeftRightTransitionDwells(1, :)};
-            plotNSingleCutoff(plotDwells, cutoffFraction, twoSingleFitParams, names, cmap, twoMarkers, insideBoxSpecs, twosampleLegendSpecs, strcat(threeStateDwells(sample).name, 'Right Complex Rates'))
-            ylim([3e-3 1])
-            xlim([0 5])
-            saveas(gcf, strcat(threeStateDwells(sample).name, 'Right Complex Rates', ".png"))
+            plotNSingleCutoff(plotDwells, cutoffFraction, twoSingleFitParams, names, cmap, twoMarkers, foursampleOutsideBox, foursampleLegendSpecs, strcat(threeStateDwells(sample).name, ' Right Complex Rates'))
+            ylim([1e-2 1])
+            xlim([0 15])
+            saveas(gcf, strcat('plotRates/complexRates/', threeStateDwells(sample).name, 'Right Complex Rates', ".png"))
         end
     end
 end
@@ -495,7 +498,7 @@ function plotOneSingleExpCutoff(dwells, cutoffFraction, params, names, colors, m
     ylim([1e-3 1])
     set(gca, 'LineWidth', 3, 'FontSize', 22, 'FontWeight', 'bold')
     set(gca,'OuterPosition', [0 0 0.88 1])
-    saveas(Fig, strcat(title, ".png"))
+    % saveas(Fig, strcat(title, ".png"))
 end
 
 function plotNSingleCutoff(dwells, cutoffFraction, params, names, colors, markers, boxSpecs, legendSpecs, title)
@@ -514,7 +517,7 @@ function plotNSingleCutoff(dwells, cutoffFraction, params, names, colors, marker
     ylim([9e-3 1])
     set(gca, 'LineWidth', 3, 'FontSize', 22, 'FontWeight', 'bold')
     set(gca,'OuterPosition', [0 0 0.88 1])
-    saveas(Fig, strcat(title, ".png"))
+    % saveas(Fig, strcat(title, ".png"))
 end
 
 function fig = plotCumDistsOneMinusCutoff(dwells, cutoff, fig, mk, displayName)
