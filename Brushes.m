@@ -10,16 +10,15 @@ doExcludeTraces = 1;
 includeFastFlops = 0;
 plotDwellScatter = 0;
 doSliderPlot = 0;
-plotGroupOneSample = 1;
+plotGroupOneSample = 0;
 plotIndividualCumSum = 0;
 plotTotalTimeHistograms = 0;
 cutoffFraction = 0.95;
 doPlotHists = 0;
 appendFastFlops = 0;
-plotFourSample = 0;
+plotFourSample = 1;
 plotFourSampleThreeState = 0;
 plotNonMarkov = 0;
-plotOneSampleThreeState = 0;
 numBins = 20;
 
 doPlotTraces = 0; % Plot a Selection of Traces?
@@ -182,15 +181,7 @@ if doPlotTraces
 end
 %% Calculating Dwell Times
 for i=1:size(dualData, 2)
-    % Need to run both dwell time fitting programs
-    % [leftThigh, leftTlow, ~, ~, ~, ~] = eb_dwelltimes(dualData{2, i}', dualSecPerFrame);% = HMMleft;
-    % simpleDualDwells(i).leftLow = leftTlow;
-    % simpleDualDwells(i).leftHigh = leftThigh;
-    % 
-    % [rightThigh, rightTlow, ~, ~, ~, ~]= eb_dwelltimes(dualData{4, i}', dualSecPerFrame);% = HMMright;
-    % simpleDualDwells(i).rightLow = rightTlow;
-    % simpleDualDwells(i).rightHigh = rightThigh;
-
+    
     [~, leftThigh, leftTlow, leftThighInd, leftTlowInd, ~, ~, ~, ~] = eb_dwelltimes_traceInd_MN(dualData{2, i}', dualSecPerFrame);
     simpleDualDwells(i).leftLow = leftTlow;
     simpleDualDwells(i).leftTlowInd = leftTlowInd;
@@ -361,27 +352,6 @@ annealTemp=30;
 fitParams = {ub, lb, guess, annealTemp};
 singleFitParams = {'10', '0', '0.1', annealTemp};
 
-if plotOneSampleThreeState
-    % Binding
-    cmap = linspecer(4);
-    sampleNumber = 1;
-    name = simpleDualDwells(sampleNumber).name{1};
-    if plotNonMarkov
-        plotOneSingleExpCutoff(threeStateDwells(sampleNumber).middleLeftRebindDwells(1, :), cutoffFraction,{singleFitParams}, name, cmap(1, :),...
-            {'ks'}, outsideBoxSpecs, sprintf('Brushless Middle State Dwell (Left Time to Rebind) Cutoff = %0.3f', cutoffFraction))
-        plotOneSingleExpCutoff(threeStateDwells(sampleNumber).middleLeftRightTransitionDwells(1, :),cutoffFraction, {singleFitParams}, name, cmap(1, :),...
-            {'ks'}, outsideBoxSpecs, sprintf('Brushless Middle State Dwell (Left Right Transition) Cutoff = %0.3f', cutoffFraction))
-        plotOneSingleExpCutoff(threeStateDwells(sampleNumber).middleRightLeftTransitionDwells(1, :), cutoffFraction,{singleFitParams}, name, cmap(1, :),...
-            {'ks'}, outsideBoxSpecs, sprintf('Brushless Middle State Dwell (Right Left Transistion) Cutoff = %0.3f', cutoffFraction))
-         plotOneSingleExpCutoff(threeStateDwells(sampleNumber).middleRightRebindDwells(1, :),cutoffFraction, {singleFitParams}, name, cmap(1, :),...
-            {'ks'}, outsideBoxSpecs, sprintf('Brushless Middle State Dwell (Right Time to Rebind) Cutoff = %0.3f', cutoffFraction))
-    end
-    plotOneSingleExpCutoff(threeStateDwells(sampleNumber).middleRightDwells(1, :),cutoffFraction, {singleFitParams}, name, cmap(1, :),...
-            {'ks'}, outsideBoxSpecs, sprintf('Brushless Middle Right Dwell Cutoff = %0.3f', cutoffFraction))
-    plotOneSingleExpCutoff(threeStateDwells(sampleNumber).middleLeftDwells(1, :),cutoffFraction, {singleFitParams}, name, cmap(1, :),...
-            {'ks'}, outsideBoxSpecs, sprintf('Brushless Middle Left Dwell Cutoff = %0.3f', cutoffFraction))
-end
-
 if plotGroupOneSample
     % Plot Left
     cmap = linspecer(2);
@@ -423,7 +393,41 @@ if plotGroupOneSample
     ylim([3e-3 1])
     xlim([0 5])
     saveas(gcf, strcat('Right Complex Rates', ".png"))
+end
 
+if plotFourSample
+    % Binding
+    cmap = linspecer(4);
+    fourSingleFitParams = {singleFitParams; singleFitParams; singleFitParams; singleFitParams};
+    numSamples = size(simpleDualDwells, 2);
+    plotDwells = cell(numSamples, 1);
+    names = cell(numSamples, 1);
+    for i = 1:numSamples
+        plotDwells{i} = simpleDualDwells(i).leftHigh;
+        names{i} = simpleDualDwells(i).name{1};
+    end
+    plotNSingleCutoff(plotDwells, fourSingleFitParams, names, cmap,...
+        {'ks', 'ko', 'k*', 'kx'}, [0.48 0.15 0.35 0.16], "Left Time to Bind")
+    plotDwells = cell(numSamples, 1);
+    names = cell(numSamples, 1);
+    for i = 1:numSamples
+        plotDwells{i} = simpleDualDwells(i).rightHigh;
+        names{i} = simpleDualDwells(i).name{1};
+    end
+    plotNDoubleExpOneMinus(plotDwells, {fitParams; fitParams; fitParams; fitParams}, names, cmap,...
+        {'ks', 'ko', 'k*', 'kx'}, [0.48 0.15 0.35 0.16], "Right Time to Bind")
+
+    % Dissociation
+    for i = 1:numSamples
+        plotDwells{i} = simpleDualDwells(i).leftLow;
+    end
+    plotNSingleExpOneMinus(plotDwells, {singleFitParams; singleFitParams; singleFitParams; singleFitParams}, names, cmap,...
+        {'ks', 'ko', 'k*', 'kx'}, [0.7 0.15 0.17 0.16], "Left Time To Dissociate")
+    for i = 1:numSamples
+        plotDwells{i} = simpleDualDwells(i).rightLow;
+    end
+    plotNSingleExpOneMinus(plotDwells, {singleFitParams; singleFitParams; singleFitParams; singleFitParams}, names, cmap,...
+        {'ks', 'ko', 'k*', 'kx'}, [0.7 0.15 0.17 0.16], "Right Time To Dissociate")
 end
 
 %% Plotting Functions
