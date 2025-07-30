@@ -17,8 +17,7 @@ cutoffFraction = 0.95;
 doPlotHists = 0;
 appendFastFlops = 0;
 plotFourSample = 1;
-plotFourSampleThreeState = 0;
-plotNonMarkov = 0;
+plotNonMarkov = 1;
 numBins = 20;
 
 doPlotTraces = 0; % Plot a Selection of Traces?
@@ -43,6 +42,7 @@ outsideBoxSpecs = [0.68 0.15 0.3 0.16];
 insideBoxSpecs = [0.600833333333333 0.145 0.182500000000002 0.11];
 foursampleOutsideBox = [0.814166666666669 0.14 0.181666666666676 0.21875];
 foursampleLegendSpecs = [0.821483335655433 0.466562506705523 0.162499995355805 0.459374986588955];
+twosampleLegendSpecs = [0.619816668988765 0.272187503967434 0.162499995355805 0.278124992065133];
 
 old0_0exclude = [7, 21, 24, 49, 50, 53, 56];
 
@@ -449,6 +449,31 @@ if plotFourSample
     xlim([0 15])
     ylim([1e-2 1])
     saveas(gcf, strcat('Brushes Right Time to Dissociate', ".png"))
+    if plotNonMarkov
+        for sample = 1:numSamples
+            % Plot Left Markov
+            cmap = linspecer(2);
+            twoSingleFitParams = {singleFitParams; singleFitParams};
+            names = {'$K_{LUL}$', '$K_{RUL}$'};
+            twoMarkers = {'ks', 'ko'};
+            plotDwells = {threeStateDwells(sample).middleLeftRebindDwells(1, :), threeStateDwells(sample).middleRightLeftTransitionDwells(1, :)};
+            plotNSingleCutoff(plotDwells, cutoffFraction, twoSingleFitParams, names, cmap, twoMarkers, insideBoxSpecs, twosampleLegendSpecs, strcat(threeStateDwells(sample).name, 'Left Complex Rates'))
+            ylim([3e-3 1])
+            xlim([0 5])
+            saveas(gcf, strcat(threeStateDwells(sample).name, 'Left Complex Rates', ".png"))
+        
+            % Plot Right Markov
+            cmap = linspecer(2);
+            twoSingleFitParams = {singleFitParams; singleFitParams};
+            names = {'$K_{RUR}$', '$K_{LUR}$'};
+            twoMarkers = {'ks', 'ko'};
+            plotDwells = {threeStateDwells(sample).middleRightRebindDwells(1, :), threeStateDwells(sample).middleLeftRightTransitionDwells(1, :)};
+            plotNSingleCutoff(plotDwells, cutoffFraction, twoSingleFitParams, names, cmap, twoMarkers, insideBoxSpecs, twosampleLegendSpecs, strcat(threeStateDwells(sample).name, 'Right Complex Rates'))
+            ylim([3e-3 1])
+            xlim([0 5])
+            saveas(gcf, strcat(threeStateDwells(sample).name, 'Right Complex Rates', ".png"))
+        end
+    end
 end
 
 %% Plotting Functions
