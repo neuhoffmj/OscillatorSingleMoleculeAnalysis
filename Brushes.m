@@ -41,6 +41,8 @@ end
 
 outsideBoxSpecs = [0.68 0.15 0.3 0.16];
 insideBoxSpecs = [0.600833333333333 0.145 0.182500000000002 0.11];
+foursampleOutsideBox = [0.814166666666669 0.14 0.181666666666676 0.21875];
+foursampleLegendSpecs = [0.821483335655433 0.466562506705523 0.162499995355805 0.459374986588955];
 
 old0_0exclude = [7, 21, 24, 49, 50, 53, 56];
 
@@ -399,45 +401,64 @@ if plotFourSample
     % Binding
     cmap = linspecer(4);
     fourSingleFitParams = {singleFitParams; singleFitParams; singleFitParams; singleFitParams};
-    numSamples = size(simpleDualDwells, 2);
+    fourMarkers = {'ks', 'ko', 'k*', 'kx'};
+    numSamples = size(threeStateDwells, 2);
     plotDwells = cell(numSamples, 1);
     names = cell(numSamples, 1);
     for i = 1:numSamples
-        plotDwells{i} = simpleDualDwells(i).leftHigh;
-        names{i} = simpleDualDwells(i).name{1};
+        plotDwells{i} = threeStateDwells(i).middleLeftDwells(1, :);
+        names{i} = threeStateDwells(i).name{1};
     end
-    plotNSingleCutoff(plotDwells, fourSingleFitParams, names, cmap,...
-        {'ks', 'ko', 'k*', 'kx'}, [0.48 0.15 0.35 0.16], "Left Time to Bind")
+    plotNSingleCutoff(plotDwells, cutoffFraction, fourSingleFitParams, names, cmap,...
+        fourMarkers, foursampleOutsideBox,foursampleLegendSpecs, "Left Time to Bind")
+    xlim([0 15])
+    ylim([1e-2 1])
+    saveas(gcf, strcat('Brushes Left Time to Bind', ".png"))
+    
     plotDwells = cell(numSamples, 1);
     names = cell(numSamples, 1);
     for i = 1:numSamples
-        plotDwells{i} = simpleDualDwells(i).rightHigh;
-        names{i} = simpleDualDwells(i).name{1};
+        plotDwells{i} = threeStateDwells(i).middleRightDwells(1, :);
+        names{i} = threeStateDwells(i).name{1};
     end
-    plotNDoubleExpOneMinus(plotDwells, {fitParams; fitParams; fitParams; fitParams}, names, cmap,...
-        {'ks', 'ko', 'k*', 'kx'}, [0.48 0.15 0.35 0.16], "Right Time to Bind")
+    plotNSingleCutoff(plotDwells, cutoffFraction, fourSingleFitParams, names, cmap,...
+        fourMarkers, foursampleOutsideBox,foursampleLegendSpecs, "Right Time to Bind")
+    xlim([0 15])
+    ylim([1e-2 1])
+    saveas(gcf, strcat('Brushes Right Time to Bind', ".png"))
 
     % Dissociation
     for i = 1:numSamples
-        plotDwells{i} = simpleDualDwells(i).leftLow;
+        plotDwells{i} = threeStateDwells(i).leftDwells(1, :);
+        names{i} = threeStateDwells(i).name{1};
     end
-    plotNSingleExpOneMinus(plotDwells, {singleFitParams; singleFitParams; singleFitParams; singleFitParams}, names, cmap,...
-        {'ks', 'ko', 'k*', 'kx'}, [0.7 0.15 0.17 0.16], "Left Time To Dissociate")
+    plotNSingleCutoff(plotDwells, cutoffFraction, fourSingleFitParams, names, cmap,...
+        fourMarkers, foursampleOutsideBox,foursampleLegendSpecs, "Left Time to Dissociate")
+    xlim([0 15])
+    ylim([1e-2 1])
+    saveas(gcf, strcat('Brushes Left Time to Dissociate', ".png"))
+
+    plotDwells = cell(numSamples, 1);
+    names = cell(numSamples, 1);
     for i = 1:numSamples
-        plotDwells{i} = simpleDualDwells(i).rightLow;
+        plotDwells{i} = threeStateDwells(i).rightDwells(1, :);
+        names{i} = threeStateDwells(i).name{1};
     end
-    plotNSingleExpOneMinus(plotDwells, {singleFitParams; singleFitParams; singleFitParams; singleFitParams}, names, cmap,...
-        {'ks', 'ko', 'k*', 'kx'}, [0.7 0.15 0.17 0.16], "Right Time To Dissociate")
+    plotNSingleCutoff(plotDwells, cutoffFraction, fourSingleFitParams, names, cmap,...
+        fourMarkers, foursampleOutsideBox,foursampleLegendSpecs, "Right Time to Dissociate")
+    xlim([0 15])
+    ylim([1e-2 1])
+    saveas(gcf, strcat('Brushes Right Time to Dissociate', ".png"))
 end
 
 %% Plotting Functions
  
-function plotOneSingleExpCutoff(dwells, cutoffFraction, params, names, colors, markers, boxSpecs, title)
+function plotOneSingleExpCutoff(dwells, cutoffFraction, params, names, colors, markers, boxSpecs, legendSpecs, title)
     Fig = figure('Position', [100 100 1500 800]);
     N = length(names);
     str = cell(N);
     plotCumDistsOneMinusCutoff(dwells', cutoffFraction, Fig, markers{1}, names);
-    oneMinusFirstParams = plotFitsCutoffOneMinus(Fig, dwells', cutoffFraction, params{1}, colors(1, :), title, names);
+    oneMinusFirstParams = plotFitsCutoffOneMinus(Fig, dwells', cutoffFraction, params{1}, colors(1, :),legendSpecs, title, names);
     % oneMinusFirstParams = plotFitsOneMinus(Fig, dwells', params{1}, colors(1, :), title, names);
     str{1} = strcat(names, sprintf(': k = %.2f',oneMinusFirstParams(1)));
     str{2} = sprintf('N = %d Dwell Times',length(dwells));
@@ -452,16 +473,16 @@ function plotOneSingleExpCutoff(dwells, cutoffFraction, params, names, colors, m
     saveas(Fig, strcat(title, ".png"))
 end
 
-function plotNSingleCutoff(dwells, cutoffFraction, params, names, colors, markers, boxSpecs, title)
+function plotNSingleCutoff(dwells, cutoffFraction, params, names, colors, markers, boxSpecs, legendSpecs, title)
     Fig = figure('Position', [100 100 1200 800]);
     N = length(names);
     str = cell(N);
     for i = 1:N
         plotCumDistsOneMinusCutoff(dwells{i}', cutoffFraction, Fig, markers{i}, names{i});
-        oneMinusFirstParams = plotFitsCutoffOneMinus(Fig, dwells{i}', cutoffFraction, params{i}, colors(i, :), title, names{i});
+        oneMinusFirstParams = plotFitsCutoffOneMinus(Fig, dwells{i}', cutoffFraction, params{i}, colors(i, :),legendSpecs, title, names{i});
         str{i} = strcat(names{i}, sprintf(': k = %.2f Hz',oneMinusFirstParams));
     end
-    t = annotation('textbox',boxSpecs,'String',str, 'Interpreter','tex');%,'FitBoxToText','on');
+    t = annotation('textbox',boxSpecs,'String',str, 'Interpreter','latex');%,'FitBoxToText','on');
     t.FontSize = 18;
     t.FontWeight = 'bold';
     xlim([0 30])
@@ -488,14 +509,14 @@ function fig = plotCumDistsOneMinusCutoff(dwells, cutoff, fig, mk, displayName)
     hold on
 end
 
-function params = plotFitsCutoffOneMinus(fig, dwells, cutoffFraction, fitParams, clr, Title, fitName)
+function params = plotFitsCutoffOneMinus(fig, dwells, cutoffFraction, fitParams, clr, legendSpecs, Title, fitName)
     fig = figure(fig);
     [CumDist, CumDistTimes] = ecdf(dwells);
     CumDistTimes(1) = 0;
     dwellTimeCutoff = min(CumDistTimes(CumDist>=cutoffFraction));
     sortDwells = sort(dwells);
     params = fitSingleExp(dwells(dwells<dwellTimeCutoff), fitParams, clr, fitName);
-    lgd = legend('Location', [0.619816668988765 0.272187503967434 0.162499995355805 0.278124992065133], 'Interpreter','tex');
+    lgd = legend('Location', legendSpecs, 'Interpreter','latex');
     % title(lgd, 'Brush Lengths')
     title(Title, 'Interpreter','none')
     xlabel('Time (s)')
