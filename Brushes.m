@@ -9,21 +9,21 @@ secPerFrame = dualSecPerFrame;
 doExcludeTraces = 1;
 includeFastFlops = 0;
 plotDwellScatter = 0;
-doSliderPlot = 0;
+doSliderPlot = 1;
 plotGroupOneSample = 0;
 plotIndividualCumSum = 0;
 plotTotalTimeHistograms = 0;
 cutoffFraction = 0.95;
 doPlotHists = 0;
 appendFastFlops = 0;
-plotFourSample = 1;
-plotNonMarkov = 1;
-plotSimpleRates = 1;
+plotFourSample = 0;
+plotNonMarkov = 0;
+plotSimpleRates = 0;
 numBins = 20;
 
-doPlotTraces = 0; % Plot a Selection of Traces?
+doPlotTraces = 1; % Plot a Selection of Traces?
 plotTraces = {[41],...
-    [],[],[]}; 
+    [1],[5],[12]}; 
 
 %% Loading Data
 dualData = {'0_0' '0_10' '30_0' '30_10';...
