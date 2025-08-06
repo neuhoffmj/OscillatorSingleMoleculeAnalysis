@@ -392,7 +392,7 @@ if plotGroupOneSample
     plotNSingleCutoff(plotDwells, cutoffFraction, twoSingleFitParams, names, cmap, twoMarkers, insideBoxSpecs, 'Left Rates')
     ylim([10e-3 1])
     xlim([0 10])
-    saveas(gcf, strcat('Left Rates', ".png"))
+    saveas(gcf, strcat('plotRates/','Left Rates', ".png"))
     % Plot Right
     names = {'K_{RU}', 'K_{UR}'};
     twoMarkers = {'ks', 'ko'};
@@ -400,7 +400,7 @@ if plotGroupOneSample
     plotNSingleCutoff(plotDwells, cutoffFraction, twoSingleFitParams, names, cmap, twoMarkers, insideBoxSpecs, 'Right Rates')
     ylim([10e-3 1])
     xlim([0 10])
-    saveas(gcf, strcat('Right Rates', ".png"))
+    saveas(gcf, strcat('plotRates/','Right Rates', ".png"))
     
     % Plot Left Markov
     cmap = linspecer(2);
@@ -411,7 +411,7 @@ if plotGroupOneSample
     plotNSingleCutoff(plotDwells, cutoffFraction, twoSingleFitParams, names, cmap, twoMarkers, insideBoxSpecs, 'Left Complex Rates')
     ylim([3e-3 1])
     xlim([0 5])
-    saveas(gcf, strcat('Left Complex Rates', ".png"))
+    saveas(gcf, strcat('plotRates/complexRates/','Left Complex Rates', ".png"))
 
     % Plot Right Markov
     cmap = linspecer(2);
@@ -422,7 +422,7 @@ if plotGroupOneSample
     plotNSingleCutoff(plotDwells, cutoffFraction, twoSingleFitParams, names, cmap, twoMarkers, insideBoxSpecs, 'Right Complex Rates')
     ylim([3e-3 1])
     xlim([0 5])
-    saveas(gcf, strcat('Right Complex Rates', ".png"))
+    saveas(gcf, strcat('plotRates/complexRates/','Right Complex Rates', ".png"))
 
 end
 
@@ -464,7 +464,7 @@ function plotNSingleCutoff(dwells, cutoffFraction, params, names, colors, marker
     ylim([9e-3 1])
     set(gca, 'LineWidth', 3, 'FontSize', 22, 'FontWeight', 'bold')
     set(gca,'OuterPosition', [0 0 0.88 1])
-    saveas(Fig, strcat(title, ".png"))
+    % saveas(Fig, strcat(title, ".png"))
 end
 
 function fig = plotCumDistsOneMinusCutoff(dwells, cutoff, fig, mk, displayName)
