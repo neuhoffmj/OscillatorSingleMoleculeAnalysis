@@ -409,33 +409,38 @@ end
 
 %% Make Rate Bar Plots
 load('rates.mat', 'fittedRates');
-
 % Extract names, rates, and errors for all entries
-names = fittedRates(:,1);
-rates = cell2mat(fittedRates(:,2));
-errors = cell2mat(fittedRates(:,3));
+primaryNames = fittedRates(1:4,1);
+primaryRates = cell2mat(fittedRates(1:4,2));
+primaryErrors = cell2mat(fittedRates(1:4,3));
+
+markovNames = fittedRates(5:end,1);
+markovRates = cell2mat(fittedRates(5:end,2));
+markovErrors = cell2mat(fittedRates(5:end,3));
 
 % Convert names to categorical for bar plotting
-catNames = categorical(names);
-catNames = reordercats(catNames, names);
+primaryCatNames = categorical(primaryNames);
+markovCatNames = categorical(markovNames);
 
-% Plot first 4 rates
+% Plot Primary Rates
 figure;
-bar(catNames(1:4), rates(1:4));
+bar(primaryCatNames, primaryRates);
 hold on
-errorbar(catNames(1:4), rates(1:4), errors(1:4), '.k', 'LineWidth', 2)
+errorbar(primaryCatNames, primaryRates, primaryErrors, '.k', 'LineWidth', 2)
 ylabel('Rate (s^{-1})')
-title('Fitted Rates (First 4)')
+title('Primary Rates')
 set(gca, 'FontWeight', 'bold', 'FontSize', 14)
+saveas(gcf, 'plotRates/Primary_Rates.png')
 
-% Plot rates from 4 onward
+% Plot Complex Rates
 figure;
-bar(catNames(4:end), rates(4:end));
+bar(markovCatNames, markovRates);
 hold on
-errorbar(catNames(4:end), rates(4:end), errors(4:end), '.k', 'LineWidth', 2)
+errorbar(markovCatNames, markovRates, markovErrors, '.k', 'LineWidth', 2)
 ylabel('Rate (s^{-1})')
-title('Fitted Rates (4:end)')
+title('Complex Rates')
 set(gca, 'FontWeight', 'bold', 'FontSize', 14)
+saveas(gcf, 'plotRates/Complex_Rates.png')
 
 %% Plotting Functions
  
