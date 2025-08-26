@@ -10,7 +10,7 @@ doExcludeTraces = 1;
 includeFastFlops = 0;
 plotDwellScatter = 0;
 doSliderPlot = 0;
-plotGroupOneSample = 1;
+plotAllBrushless = 0;
 plotIndividualCumSum = 0;
 plotTotalTimeHistograms = 0;
 cutoffFraction = 0.95;
@@ -361,35 +361,15 @@ annealTemp=30;
 fitParams = {ub, lb, guess, annealTemp};
 singleFitParams = {'10', '0', '0.1', annealTemp};
 
-if plotOneSampleThreeState
-    % Binding
-    cmap = linspecer(4);
-    sampleNumber = 1;
-    name = simpleDualDwells(sampleNumber).name{1};
-    if plotNonMarkov
-        plotOneSingleExpCutoff(threeStateDwells(sampleNumber).middleLeftRebindDwells(1, :), cutoffFraction,{singleFitParams}, name, cmap(1, :),...
-            {'ks'}, outsideBoxSpecs, sprintf('Brushless Middle State Dwell (Left Time to Rebind) Cutoff = %0.3f', cutoffFraction))
-        plotOneSingleExpCutoff(threeStateDwells(sampleNumber).middleLeftRightTransitionDwells(1, :),cutoffFraction, {singleFitParams}, name, cmap(1, :),...
-            {'ks'}, outsideBoxSpecs, sprintf('Brushless Middle State Dwell (Left Right Transition) Cutoff = %0.3f', cutoffFraction))
-        plotOneSingleExpCutoff(threeStateDwells(sampleNumber).middleRightLeftTransitionDwells(1, :), cutoffFraction,{singleFitParams}, name, cmap(1, :),...
-            {'ks'}, outsideBoxSpecs, sprintf('Brushless Middle State Dwell (Right Left Transistion) Cutoff = %0.3f', cutoffFraction))
-         plotOneSingleExpCutoff(threeStateDwells(sampleNumber).middleRightRebindDwells(1, :),cutoffFraction, {singleFitParams}, name, cmap(1, :),...
-            {'ks'}, outsideBoxSpecs, sprintf('Brushless Middle State Dwell (Right Time to Rebind) Cutoff = %0.3f', cutoffFraction))
-    end
-    plotOneSingleExpCutoff(threeStateDwells(sampleNumber).middleRightDwells(1, :),cutoffFraction, {singleFitParams}, name, cmap(1, :),...
-            {'ks'}, outsideBoxSpecs, sprintf('Brushless Middle Right Dwell Cutoff = %0.3f', cutoffFraction))
-    plotOneSingleExpCutoff(threeStateDwells(sampleNumber).middleLeftDwells(1, :),cutoffFraction, {singleFitParams}, name, cmap(1, :),...
-            {'ks'}, outsideBoxSpecs, sprintf('Brushless Middle Left Dwell Cutoff = %0.3f', cutoffFraction))
-end
-
-if plotGroupOneSample
+if plotAllBrushless
     % Plot Left
     cmap = linspecer(2);
     twoSingleFitParams = {singleFitParams; singleFitParams};
-    names = {"K_{LU}", "K_{UL}"};
+    names = {'K_{LU}', 'K_{UL}'};
     twoMarkers = {'ks', 'ko'};
     plotDwells = {threeStateDwells(1).leftDwells(1, :), threeStateDwells(1).middleLeftDwells(1, :)};
-    plotNSingleCutoff(plotDwells, cutoffFraction, twoSingleFitParams, names, cmap, twoMarkers, insideBoxSpecs, 'Left Rates')
+    fittedRates = {};
+    fittedRates = [fittedRates; plotNSingleCutoff(plotDwells, cutoffFraction, twoSingleFitParams, names, cmap, twoMarkers, insideBoxSpecs, 'Left Rates')];
     ylim([10e-3 1])
     xlim([0 10])
     saveas(gcf, strcat('plotRates/','Left Rates', ".png"))
@@ -397,18 +377,19 @@ if plotGroupOneSample
     names = {'K_{RU}', 'K_{UR}'};
     twoMarkers = {'ks', 'ko'};
     plotDwells = {threeStateDwells(1).rightDwells(1, :), threeStateDwells(1).middleRightDwells(1, :)};
-    plotNSingleCutoff(plotDwells, cutoffFraction, twoSingleFitParams, names, cmap, twoMarkers, insideBoxSpecs, 'Right Rates')
+    fittedRates = [fittedRates; plotNSingleCutoff(plotDwells, cutoffFraction, twoSingleFitParams, names, cmap, twoMarkers, insideBoxSpecs, 'Right Rates')];
     ylim([10e-3 1])
     xlim([0 10])
     saveas(gcf, strcat('plotRates/','Right Rates', ".png"))
-    
+    disp(fittedRates)
+
     % Plot Left Markov
     cmap = linspecer(2);
     twoSingleFitParams = {singleFitParams; singleFitParams};
     names = {'K_{LUL}', 'K_{RUL}'};
     twoMarkers = {'ks', 'ko'};
     plotDwells = {threeStateDwells(1).middleLeftRebindDwells(1, :), threeStateDwells(1).middleRightLeftTransitionDwells(1, :)};
-    plotNSingleCutoff(plotDwells, cutoffFraction, twoSingleFitParams, names, cmap, twoMarkers, insideBoxSpecs, 'Left Complex Rates')
+    fittedRates = [fittedRates; plotNSingleCutoff(plotDwells, cutoffFraction, twoSingleFitParams, names, cmap, twoMarkers, insideBoxSpecs, 'Left Complex Rates')];
     ylim([3e-3 1])
     xlim([0 5])
     saveas(gcf, strcat('plotRates/complexRates/','Left Complex Rates', ".png"))
@@ -419,12 +400,42 @@ if plotGroupOneSample
     names = {'K_{RUR}', 'K_{LUR}'};
     twoMarkers = {'ks', 'ko'};
     plotDwells = {threeStateDwells(1).middleRightRebindDwells(1, :), threeStateDwells(1).middleLeftRightTransitionDwells(1, :)};
-    plotNSingleCutoff(plotDwells, cutoffFraction, twoSingleFitParams, names, cmap, twoMarkers, insideBoxSpecs, 'Right Complex Rates')
+    fittedRates = [fittedRates; plotNSingleCutoff(plotDwells, cutoffFraction, twoSingleFitParams, names, cmap, twoMarkers, insideBoxSpecs, 'Right Complex Rates')];
     ylim([3e-3 1])
     xlim([0 5])
     saveas(gcf, strcat('plotRates/complexRates/','Right Complex Rates', ".png"))
-
+    save('rates.mat', 'fittedRates');
 end
+
+%% Make Rate Bar Plots
+load('rates.mat', 'fittedRates');
+
+% Extract names, rates, and errors for all entries
+names = fittedRates(:,1);
+rates = cell2mat(fittedRates(:,2));
+errors = cell2mat(fittedRates(:,3));
+
+% Convert names to categorical for bar plotting
+catNames = categorical(names);
+catNames = reordercats(catNames, names);
+
+% Plot first 4 rates
+figure;
+bar(catNames(1:4), rates(1:4));
+hold on
+errorbar(catNames(1:4), rates(1:4), errors(1:4), '.k', 'LineWidth', 2)
+ylabel('Rate (s^{-1})')
+title('Fitted Rates (First 4)')
+set(gca, 'FontWeight', 'bold', 'FontSize', 14)
+
+% Plot rates from 4 onward
+figure;
+bar(catNames(4:end), rates(4:end));
+hold on
+errorbar(catNames(4:end), rates(4:end), errors(4:end), '.k', 'LineWidth', 2)
+ylabel('Rate (s^{-1})')
+title('Fitted Rates (4:end)')
+set(gca, 'FontWeight', 'bold', 'FontSize', 14)
 
 %% Plotting Functions
  
@@ -448,13 +459,17 @@ function plotOneSingleExpCutoff(dwells, cutoffFraction, params, names, colors, m
     saveas(Fig, strcat(title, ".png"))
 end
 
-function plotNSingleCutoff(dwells, cutoffFraction, params, names, colors, markers, boxSpecs, title)
+function fittedRates = plotNSingleCutoff(dwells, cutoffFraction, params, names, colors, markers, boxSpecs, title)
     Fig = figure('Position', [100 100 1200 800]);
     N = length(names);
+    fittedRates = cell(N,3);
     str = cell(N);
     for i = 1:N
         plotCumDistsOneMinusCutoff(dwells{i}', cutoffFraction, Fig, markers{i}, names{i});
         [oneMinusFirstParams, error] = plotFitsCutoffOneMinus(Fig, dwells{i}', cutoffFraction, params{i}, colors(i, :), title, names{i});
+        fittedRates{i,1} = names{i};
+        fittedRates{i,2} = oneMinusFirstParams;
+        fittedRates{i,3} = error;
         str{i} = strcat(names{i}, sprintf(": k = %.3f \\pm %.3f s^{-1}",oneMinusFirstParams, error));
     end
     t = annotation('textbox',[0.495 0.13 0.293333333333334 0.13375],'String',str, 'Interpreter','tex');%,'FitBoxToText','on');
