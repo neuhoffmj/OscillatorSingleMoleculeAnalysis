@@ -386,7 +386,7 @@ if plotGroupOneSample
     % Plot Left
     cmap = linspecer(2);
     twoSingleFitParams = {singleFitParams; singleFitParams};
-    names = {'K_{LU}', 'K_{UL}'};
+    names = {"K_{LU}", "K_{UL}"};
     twoMarkers = {'ks', 'ko'};
     plotDwells = {threeStateDwells(1).leftDwells(1, :), threeStateDwells(1).middleLeftDwells(1, :)};
     plotNSingleCutoff(plotDwells, cutoffFraction, twoSingleFitParams, names, cmap, twoMarkers, insideBoxSpecs, 'Left Rates')
@@ -454,10 +454,10 @@ function plotNSingleCutoff(dwells, cutoffFraction, params, names, colors, marker
     str = cell(N);
     for i = 1:N
         plotCumDistsOneMinusCutoff(dwells{i}', cutoffFraction, Fig, markers{i}, names{i});
-        oneMinusFirstParams = plotFitsCutoffOneMinus(Fig, dwells{i}', cutoffFraction, params{i}, colors(i, :), title, names{i});
-        str{i} = strcat(names{i}, sprintf(': k = %.2f Hz',oneMinusFirstParams));
+        [oneMinusFirstParams, error] = plotFitsCutoffOneMinus(Fig, dwells{i}', cutoffFraction, params{i}, colors(i, :), title, names{i});
+        str{i} = strcat(names{i}, sprintf(": k = %.3f \\pm %.3f s^{-1}",oneMinusFirstParams, error));
     end
-    t = annotation('textbox',boxSpecs,'String',str, 'Interpreter','tex');%,'FitBoxToText','on');
+    t = annotation('textbox',[0.495 0.13 0.293333333333334 0.13375],'String',str, 'Interpreter','tex');%,'FitBoxToText','on');
     t.FontSize = 18;
     t.FontWeight = 'bold';
     xlim([0 30])
@@ -484,13 +484,13 @@ function fig = plotCumDistsOneMinusCutoff(dwells, cutoff, fig, mk, displayName)
     hold on
 end
 
-function params = plotFitsCutoffOneMinus(fig, dwells, cutoffFraction, fitParams, clr, Title, fitName)
+function [params, error] = plotFitsCutoffOneMinus(fig, dwells, cutoffFraction, fitParams, clr, Title, fitName)
     fig = figure(fig);
     [CumDist, CumDistTimes] = ecdf(dwells);
     CumDistTimes(1) = 0;
     dwellTimeCutoff = min(CumDistTimes(CumDist>=cutoffFraction));
     sortDwells = sort(dwells);
-    params = fitSingleExp(dwells(dwells<dwellTimeCutoff), fitParams, clr, fitName);
+    [params, error] = fitSingleExpBootstrap(dwells(dwells<dwellTimeCutoff), fitParams, clr, fitName);
     lgd = legend('Location', [0.619816668988765 0.272187503967434 0.162499995355805 0.278124992065133], 'Interpreter','tex');
     % title(lgd, 'Brush Lengths')
     title(Title, 'Interpreter','none')
@@ -500,6 +500,7 @@ function params = plotFitsCutoffOneMinus(fig, dwells, cutoffFraction, fitParams,
     % params;
 end
 
+
 function [singleExpParams] = fitSingleExp(dwellTimes, fitParams, clr, fitName)
     [userPDF, dataVar, fitVar, ~,~, ~]=PDFList('Single Exp', 'all', 0);
     lb = fitParams{2};
@@ -508,18 +509,28 @@ function [singleExpParams] = fitSingleExp(dwellTimes, fitParams, clr, fitName)
     annealTemp = fitParams{4};
     sortDwell = sort(dwellTimes);
     dwellsToFit = sortDwell(1:round(length(sortDwell)));
-    [singleExpParams, ~]= MEMLETCL(dwellsToFit, userPDF, dataVar, fitVar, lb,ub, guess,annealTemp); % Fit parameters and Log Likelihood output
-    % Ensure first fitted rate is the faster rate to aid interpretation
+    [singleExpParams, logLi]= MEMLETCL(dwellsToFit, userPDF, dataVar, fitVar, lb,ub, guess,annealTemp); % Fit parameters and Log Likelihood output
     fitxvals=linspace(0,max(dwellsToFit),10000)'; %create variables for plotting along x
-    % fitteddh=dbexppdfnotmin(fitxvals,doubleExpParams);  
-    % fittedCDF=cumtrapz(fitteddh(~isnan(fitteddh))); %take out any NaNs when doing cumulative (maybe at x=0?) 
-    % fittedCDFh=fittedCDF/max(fittedCDF); %normalize CDF
-    % oneMinus = 1 - fittedCDFh; % allows for log scale linear fitting
     oneMinus = exppdfoneminus(fitxvals, singleExpParams);
     semilogy(fitxvals,oneMinus, 'Color', clr, 'LineWidth', 3 , 'DisplayName',...
         fitName)
-    % semilogy(fitxvals(fitxvals<sortDwell(round(0.95*length(dwellTimes)))),oneMinus(fitxvals<sortDwell(round(0.95*length(dwellTimes)))) , 'Color', clr, 'LineWidth', 3 , 'DisplayName',...
-    %     fitName)
+end
+
+function [singleExpParams, paramError] = fitSingleExpBootstrap(dwellTimes, fitParams, clr, fitName)
+    [userPDF, dataVar, fitVar, ~,~, ~]=PDFList('Single Exp', 'all', 0);
+    lb = fitParams{2};
+    ub = fitParams{1};
+    guess = fitParams{3};
+    annealTemp = fitParams{4};
+    sortDwell = sort(dwellTimes);
+    dwellsToFit = sortDwell(1:round(length(sortDwell)));
+    [singleExpParams, logLi]= MEMLETCL(dwellsToFit, userPDF, dataVar, fitVar, lb,ub, guess,annealTemp); % Fit parameters and Log Likelihood output
+    [bootstrapParams, bootstrapLogLi]= MEMLETCL(dwellsToFit, userPDF, dataVar, fitVar, lb,ub, guess,annealTemp, 1000); % Fit parameters and Log Likelihood output
+    paramError = std(bootstrapParams);
+    fitxvals=linspace(0,max(dwellsToFit),10000)'; %create variables for plotting along x
+    oneMinus = exppdfoneminus(fitxvals, singleExpParams);
+    semilogy(fitxvals,oneMinus, 'Color', clr, 'LineWidth', 3 , 'DisplayName',...
+        fitName)
 end
 
 function [] = slider_plot(leftRaw, leftHMM, rightRaw, rightHMM, dualHMM, secPerFrame, titlestr)
