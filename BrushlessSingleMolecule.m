@@ -10,16 +10,13 @@ doExcludeTraces = 1;
 includeFastFlops = 0;
 plotDwellScatter = 0;
 doSliderPlot = 0;
-plotAllBrushless = 0;
+plotAllBrushless = 1;
 plotIndividualCumSum = 0;
 plotTotalTimeHistograms = 0;
 cutoffFraction = 0.95;
 doPlotHists = 0;
 appendFastFlops = 0;
-plotFourSample = 0;
-plotFourSampleThreeState = 0;
 plotNonMarkov = 0;
-plotOneSampleThreeState = 0;
 numBins = 20;
 
 doPlotTraces = 0; % Plot a Selection of Traces?
