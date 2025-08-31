@@ -1,5 +1,7 @@
+clc;
 clear;
 close all;
+warning('off', 'MATLAB:handle_graphics:exceptions:SceneNode');
 
 dualframeRate = 10; % Hz or fps
 movieLength = "5 Minutes";
@@ -9,8 +11,7 @@ secPerFrame = dualSecPerFrame;
 doExcludeTraces = 1;
 includeFastFlops = 0;
 plotDwellScatter = 0;
-doSliderPlot = 1;
-plotGroupOneSample = 0;
+doSliderPlot = 0;
 plotIndividualCumSum = 0;
 plotTotalTimeHistograms = 0;
 cutoffFraction = 0.95;
@@ -18,10 +19,10 @@ doPlotHists = 0;
 appendFastFlops = 0;
 plotFourSample = 0;
 plotNonMarkov = 0;
-plotSimpleRates = 0;
+plotSimpleRates = 1;
 numBins = 20;
 
-doPlotTraces = 1; % Plot a Selection of Traces?
+doPlotTraces = 0; % Plot a Selection of Traces?
 plotTraces = {[41],...
     [1],[5],[12]}; 
 
@@ -33,7 +34,7 @@ dualData = {'0_0' '0_10' '30_0' '30_10';...
     [], [], [],[]; % Right (Cy3) Raw "FRET" [5] 
     [], [], [],[]}; % Three State [6]
 numSamples = size(dualData, 2);
-dualNames = ["0_0", "0_10", "30_0", "30_10"];
+dualNames = {'0_0', '0_10', '30_0', '30_10'};
 for i=1:length(dualNames)
     simpleDualDwells(i).name = dualNames(i);
     threeStateDwells(i).name = dualNames(i);
@@ -355,49 +356,6 @@ annealTemp=30;
 fitParams = {ub, lb, guess, annealTemp};
 singleFitParams = {'10', '0', '0.1', annealTemp};
 
-if plotGroupOneSample
-    % Plot Left
-    cmap = linspecer(2);
-    twoSingleFitParams = {singleFitParams; singleFitParams};
-    names = {'K_{LU}', 'K_{UL}'};
-    twoMarkers = {'ks', 'ko'};
-    plotDwells = {threeStateDwells(1).leftDwells(1, :), threeStateDwells(1).middleLeftDwells(1, :)};
-    plotNSingleCutoff(plotDwells, cutoffFraction, twoSingleFitParams, names, cmap, twoMarkers, insideBoxSpecs, 'Left Rates')
-    ylim([10e-3 1])
-    xlim([0 10])
-    saveas(gcf, strcat('Left Rates', ".png"))
-    % Plot Right
-    names = {'K_{RU}', 'K_{UR}'};
-    twoMarkers = {'ks', 'ko'};
-    plotDwells = {threeStateDwells(1).rightDwells(1, :), threeStateDwells(1).middleRightDwells(1, :)};
-    plotNSingleCutoff(plotDwells, cutoffFraction, twoSingleFitParams, names, cmap, twoMarkers, insideBoxSpecs, 'Right Rates')
-    ylim([10e-3 1])
-    xlim([0 10])
-    saveas(gcf, strcat('Right Rates', ".png"))
-    
-    % Plot Left Markov
-    cmap = linspecer(2);
-    twoSingleFitParams = {singleFitParams; singleFitParams};
-    names = {'K_{LUL}', 'K_{RUL}'};
-    twoMarkers = {'ks', 'ko'};
-    plotDwells = {threeStateDwells(1).middleLeftRebindDwells(1, :), threeStateDwells(1).middleRightLeftTransitionDwells(1, :)};
-    plotNSingleCutoff(plotDwells, cutoffFraction, twoSingleFitParams, names, cmap, twoMarkers, insideBoxSpecs, 'Left Complex Rates')
-    ylim([3e-3 1])
-    xlim([0 5])
-    saveas(gcf, strcat('Left Complex Rates', ".png"))
-
-    % Plot Right Markov
-    cmap = linspecer(2);
-    twoSingleFitParams = {singleFitParams; singleFitParams};
-    names = {'K_{RUR}', 'K_{LUR}'};
-    twoMarkers = {'ks', 'ko'};
-    plotDwells = {threeStateDwells(1).middleRightRebindDwells(1, :), threeStateDwells(1).middleLeftRightTransitionDwells(1, :)};
-    plotNSingleCutoff(plotDwells, cutoffFraction, twoSingleFitParams, names, cmap, twoMarkers, insideBoxSpecs, 'Right Complex Rates')
-    ylim([3e-3 1])
-    xlim([0 5])
-    saveas(gcf, strcat('Right Complex Rates', ".png"))
-end
-
 if plotFourSample
     if plotSimpleRates
         % Binding
@@ -476,6 +434,17 @@ if plotFourSample
             xlim([0 15])
             saveas(gcf, strcat('plotRates/complexRates/', threeStateDwells(sample).name, 'Right Complex Rates', ".png"))
         end
+    end
+end
+
+for i =1:4
+    hypothesisTesting(threeStateDwells(i).middleLeftDwells(1,:), cutoffFraction)
+    hypothesisTesting(threeStateDwells(i).middleRightDwells(1,:), cutoffFraction)
+    if (hypothesisTesting(threeStateDwells(i).leftDwells(1,:), cutoffFraction)>0)
+        disp(strcat(threeStateDwells(i).name, " Left Dwells"))
+    end
+    if (hypothesisTesting(threeStateDwells(i).rightDwells(1,:), cutoffFraction)>0)
+        disp(strcat(threeStateDwells(i).name, " Right Dwells"))
     end
 end
 
@@ -559,20 +528,50 @@ function [singleExpParams] = fitSingleExp(dwellTimes, fitParams, clr, fitName)
     ub = fitParams{1};
     guess = fitParams{3};
     annealTemp = fitParams{4};
-    sortDwell = sort(dwellTimes);
-    dwellsToFit = sortDwell(1:round(length(sortDwell)));
-    [singleExpParams, ~]= MEMLETCL(dwellsToFit, userPDF, dataVar, fitVar, lb,ub, guess,annealTemp); % Fit parameters and Log Likelihood output
+    [singleExpParams, ~]= MEMLETCL(dwellTimes, userPDF, dataVar, fitVar, lb,ub, guess,annealTemp); % Fit parameters and Log Likelihood output
     % Ensure first fitted rate is the faster rate to aid interpretation
-    fitxvals=linspace(0,max(dwellsToFit),10000)'; %create variables for plotting along x
-    % fitteddh=dbexppdfnotmin(fitxvals,doubleExpParams);  
-    % fittedCDF=cumtrapz(fitteddh(~isnan(fitteddh))); %take out any NaNs when doing cumulative (maybe at x=0?) 
-    % fittedCDFh=fittedCDF/max(fittedCDF); %normalize CDF
-    % oneMinus = 1 - fittedCDFh; % allows for log scale linear fitting
+    fitxvals=linspace(0,max(dwellTimes),10000)'; %create variables for plotting along x
     oneMinus = exppdfoneminus(fitxvals, singleExpParams);
     semilogy(fitxvals,oneMinus, 'Color', clr, 'LineWidth', 3 , 'DisplayName',...
         fitName)
-    % semilogy(fitxvals(fitxvals<sortDwell(round(0.95*length(dwellTimes)))),oneMinus(fitxvals<sortDwell(round(0.95*length(dwellTimes)))) , 'Color', clr, 'LineWidth', 3 , 'DisplayName',...
-    %     fitName)
+end
+
+function pval = hypothesisTesting(dwellTimes, cutoff)
+    % Compute single exponential fit
+    [userPDF, dataVar, fitVar, ~,~, ~]=PDFList('Single Exp', 'all', 0);
+    annealTemp=15;
+    fitParams = {'10', '0', '0.1', annealTemp};
+    lb = fitParams{2};
+    ub = fitParams{1};
+    guess = fitParams{3};
+    annealTemp = fitParams{4};
+    [CumDist, CumDistTimes] = ecdf(dwellTimes);
+    CumDistTimes(1) = 0;
+    dwellTimeCutoff = min(CumDistTimes(CumDist>=cutoff));
+    dwellSubset = dwellTimes(dwellTimes<dwellTimeCutoff);
+    [singleExpParams, singleLogL] = MEMLETCL(dwellSubset', userPDF, dataVar, fitVar, lb,ub, guess,annealTemp); % Fit parameters and Log Likelihood output
+    % Compute double exponential fit
+    [userPDF, dataVar, fitVar, ~,~, ~]=PDFList('Double Exp (Independent)', 'all', 0);
+    ub = '1,10,10';
+    lb = '0,0.001,0.001';
+    guess = '0.5,1,.1';
+    [doubleExpParams, doubleLogL] = MEMLETCL(dwellSubset', userPDF, dataVar, fitVar, lb,ub, guess,annealTemp); % Fit parameters and Log Likelihood output
+
+    delDF = 2; %% two constraints on double exp yields single exp, hence 2
+    RLL=-2*(singleLogL-doubleLogL); % the log of the ratio of  the likelihoods
+
+    pval=1-chi2cdf(RLL,delDF); %calculate a p-value from the chi2cdf
+    % disp(singleLogL)
+    % disp(doubleLogL)
+    % disp(pval)
+    % if plow == 1
+    %     plow = '> 1 - 1e-16';
+    % elseif plow == 0
+    %     plow = '< 1e-16';
+    % else
+    %     plow = num2str(plow);
+    % end
+
 end
 
 function [] = slider_plot(leftRaw, leftHMM, rightRaw, rightHMM, dualHMM, secPerFrame, titlestr)
