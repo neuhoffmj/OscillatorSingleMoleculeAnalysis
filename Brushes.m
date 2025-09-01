@@ -438,12 +438,20 @@ if plotFourSample
 end
 
 for i =1:4
-    hypothesisTesting(threeStateDwells(i).middleLeftDwells(1,:), cutoffFraction)
-    hypothesisTesting(threeStateDwells(i).middleRightDwells(1,:), cutoffFraction)
-    if (hypothesisTesting(threeStateDwells(i).leftDwells(1,:), cutoffFraction)>0)
+    p1 = hypothesisTesting(threeStateDwells(i).middleLeftDwells(1,:), cutoffFraction);
+    if (p1>0.05)
+        disp(strcat(threeStateDwells(i).name, " Left Bind Dwells"))
+    end
+    p2 = hypothesisTesting(threeStateDwells(i).middleRightDwells(1,:), cutoffFraction);
+    if (p2>0.05)
+        disp(strcat(threeStateDwells(i).name, " Right Bind Dwells"))
+    end
+    p3 = hypothesisTesting(threeStateDwells(i).leftDwells(1,:), cutoffFraction);
+    if (p3>0.05)
         disp(strcat(threeStateDwells(i).name, " Left Dwells"))
     end
-    if (hypothesisTesting(threeStateDwells(i).rightDwells(1,:), cutoffFraction)>0)
+    p4 = hypothesisTesting(threeStateDwells(i).rightDwells(1,:), cutoffFraction);
+    if (p4>0.05)
         disp(strcat(threeStateDwells(i).name, " Right Dwells"))
     end
 end
