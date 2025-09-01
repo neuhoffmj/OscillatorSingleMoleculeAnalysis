@@ -21,6 +21,7 @@ plotFourSample = 1;
 plotNonMarkov = 0;
 plotSimpleRates = 1;
 numBins = 20;
+barPlots = 0;
 
 doPlotTraces = 0; % Plot a Selection of Traces?
 plotTraces = {[41],...
@@ -34,7 +35,7 @@ dualData = {'0_0' '0_10' '30_0' '30_10';...
     [], [], [],[]; % Right (Cy3) Raw "FRET" [5]
     [], [], [],[]}; % Three State [6]
 numSamples = size(dualData, 2);
-dualNames = {'0_0', '0_10', '30_0', '30_10'};
+dualNames = {'0\_0', '0\_10', '30\_0', '30\_10'};
 for i=1:length(dualNames)
     simpleDualDwells(i).name = dualNames(i);
     threeStateDwells(i).name = dualNames(i);
@@ -457,63 +458,44 @@ for i =1:4
     end
 end
 
-%% Make Brushless Rate Bar Plots
-load('rates.mat', 'fittedRates');
-% Extract names, rates, and errors for all entries
-primaryNames = fittedRates(1:4,1);
-primaryRates = cell2mat(fittedRates(1:4,2));
-primaryErrors = cell2mat(fittedRates(1:4,3));
+if barPlots
+    %% Make Brushless Rate Bar Plots
+    load('rates.mat', 'fittedRates');
+    % Extract names, rates, and errors for all entries
+    primaryNames = fittedRates(1:4,1);
+    primaryRates = cell2mat(fittedRates(1:4,2));
+    primaryErrors = cell2mat(fittedRates(1:4,3));
 
-markovNames = fittedRates(5:end,1);
-markovRates = cell2mat(fittedRates(5:end,2));
-markovErrors = cell2mat(fittedRates(5:end,3));
+    markovNames = fittedRates(5:end,1);
+    markovRates = cell2mat(fittedRates(5:end,2));
+    markovErrors = cell2mat(fittedRates(5:end,3));
 
-% Convert names to categorical for bar plotting
-primaryCatNames = categorical(primaryNames);
-markovCatNames = categorical(markovNames);
+    % Convert names to categorical for bar plotting
+    primaryCatNames = categorical(primaryNames);
+    markovCatNames = categorical(markovNames);
 
-% Plot Primary Rates
-figure;
-bar(primaryCatNames, primaryRates);
-hold on
-errorbar(primaryCatNames, primaryRates, primaryErrors, '.k', 'LineWidth', 2)
-ylabel('Rate (s^{-1})')
-title('Primary Rates')
-set(gca, 'FontWeight', 'bold', 'FontSize', 14)
-saveas(gcf, 'plotRates/Primary_Rates.png')
+    % Plot Primary Rates
+    figure;
+    bar(primaryCatNames, primaryRates);
+    hold on
+    errorbar(primaryCatNames, primaryRates, primaryErrors, '.k', 'LineWidth', 2)
+    ylabel('Rate (s^{-1})')
+    title('Primary Rates')
+    set(gca, 'FontWeight', 'bold', 'FontSize', 14)
+    saveas(gcf, 'plotRates/Primary_Rates.png')
 
-% Plot Complex Rates
-figure;
-bar(markovCatNames, markovRates);
-hold on
-errorbar(markovCatNames, markovRates, markovErrors, '.k', 'LineWidth', 2)
-ylabel('Rate (s^{-1})')
-title('Complex Rates')
-set(gca, 'FontWeight', 'bold', 'FontSize', 14)
-saveas(gcf, 'plotRates/Complex_Rates.png')
-
-%% Plotting Functions
-
-function plotOneSingleExpCutoff(dwells, cutoffFraction, params, names, colors, markers, boxSpecs, legendSpecs, title)
-    Fig = figure('Position', [100 100 1500 800]);
-    N = length(names);
-    str = cell(N);
-    plotCumDistsOneMinusCutoff(dwells', cutoffFraction, Fig, markers{1}, names);
-    oneMinusFirstParams = plotFitsCutoffOneMinus(Fig, dwells', cutoffFraction, params{1}, colors(1, :),legendSpecs, title, names);
-    % oneMinusFirstParams = plotFitsOneMinus(Fig, dwells', params{1}, colors(1, :), title, names);
-    str{1} = strcat(names, sprintf(': k = %.2f',oneMinusFirstParams(1)));
-    str{2} = sprintf('N = %d Dwell Times',length(dwells));
-    str{3} = sprintf('Cutoff Fraction = %0.3f',cutoffFraction);
-    t = annotation('textbox',boxSpecs,'String',str, 'Interpreter','none');%,'FitBoxToText','on');
-    t.FontSize = 18;
-    t.FontWeight = 'bold';
-    xlim([0 4])
-    ylim([1e-3 1])
-    set(gca, 'LineWidth', 3, 'FontSize', 22, 'FontWeight', 'bold')
-    set(gca,'OuterPosition', [0 0 0.88 1])
-    % saveas(Fig, strcat(title, ".png"))
+    % Plot Complex Rates
+    figure;
+    bar(markovCatNames, markovRates);
+    hold on
+    errorbar(markovCatNames, markovRates, markovErrors, '.k', 'LineWidth', 2)
+    ylabel('Rate (s^{-1})')
+    title('Complex Rates')
+    set(gca, 'FontWeight', 'bold', 'FontSize', 14)
+    saveas(gcf, 'plotRates/Complex_Rates.png')
 end
-
+%% Plotting Functions
+% Single exp plotting functions
 function fittedRates = plotNSingleCutoff(dwells, cutoffFraction, params, names, colors, markers, boxSpecs, legendSpecs, title)
     Fig = figure('Position', [100 100 1200 800]);
     N = length(names);
@@ -537,27 +519,20 @@ function fittedRates = plotNSingleCutoff(dwells, cutoffFraction, params, names, 
     % saveas(Fig, strcat(title, ".png"))
 end
 
-function fittedRates = plotNDoubleCutoff(dwells, cutoffFraction, params, names, colors, markers, boxSpecs, legendSpecs, title)
-    Fig = figure('Position', [100 100 1200 800]);
-    N = length(names);
-    fittedRates = cell(N,3);
-    str = cell(N);
-    for i = 1:N
-        plotCumDistsOneMinusCutoff(dwells{i}', cutoffFraction, Fig, markers{i}, names{i});
-        [oneMinusFirstParams, error] = plotDoubleFitsCutoff(Fig, dwells{i}', cutoffFraction, params{i}, colors(i, :),legendSpecs, title, names{i});
-        fittedRates{i,1} = names{i};
-        fittedRates{i,2} = oneMinusFirstParams;
-        fittedRates{i,3} = error;
-        str{i} = strcat(names{i}, sprintf(": k = %.3f \\pm %.3f s^{-1}",oneMinusFirstParams, error));
-    end
-    t = annotation('textbox',[0.495 0.13 0.293333333333334 0.13375],'String',str, 'Interpreter','tex');%,'FitBoxToText','on');
-    t.FontSize = 18;
-    t.FontWeight = 'bold';
-    xlim([0 30])
-    ylim([9e-3 1])
-    set(gca, 'LineWidth', 3, 'FontSize', 22, 'FontWeight', 'bold')
-    set(gca,'OuterPosition', [0 0 0.88 1])
-    % saveas(Fig, strcat(title, ".png"))
+function [params, error] = plotFitsCutoffOneMinus(fig, dwells, cutoffFraction, fitParams, clr, legendSpecs, Title, fitName)
+    fig = figure(fig);
+    [CumDist, CumDistTimes] = ecdf(dwells);
+    CumDistTimes(1) = 0;
+    dwellTimeCutoff = min(CumDistTimes(CumDist>=cutoffFraction));
+    sortDwells = sort(dwells);
+    [params, error] = fitSingleExpBootstrap(dwells(dwells<dwellTimeCutoff), fitParams, clr, fitName);
+    lgd = legend('Location', legendSpecs, 'Interpreter','latex');
+    % title(lgd, 'Brush Lengths')
+    title(Title, 'Interpreter','none')
+    xlabel('Time (s)')
+    ylabel('CCDF')
+    set(gca, 'linewidth', 2, 'fontweight','bold', 'fontsize',16)
+    % params;
 end
 
 function fig = plotCumDistsOneMinusCutoff(dwells, cutoff, fig, mk, displayName)
@@ -577,20 +552,59 @@ function fig = plotCumDistsOneMinusCutoff(dwells, cutoff, fig, mk, displayName)
     hold on
 end
 
-function [params, error] = plotFitsCutoffOneMinus(fig, dwells, cutoffFraction, fitParams, clr, legendSpecs, Title, fitName)
-    fig = figure(fig);
-    [CumDist, CumDistTimes] = ecdf(dwells);
-    CumDistTimes(1) = 0;
-    dwellTimeCutoff = min(CumDistTimes(CumDist>=cutoffFraction));
-    sortDwells = sort(dwells);
-    [params, error] = fitSingleExpBootstrap(dwells(dwells<dwellTimeCutoff), fitParams, clr, fitName);
-    lgd = legend('Location', legendSpecs, 'Interpreter','latex');
-    % title(lgd, 'Brush Lengths')
-    title(Title, 'Interpreter','none')
-    xlabel('Time (s)')
-    ylabel('CCDF')
-    set(gca, 'linewidth', 2, 'fontweight','bold', 'fontsize',16)
-    % params;
+function [singleExpParams, paramError] = fitSingleExpBootstrap(dwellTimes, fitParams, clr, fitName)
+    [userPDF, dataVar, fitVar, ~,~, ~]=PDFList('Single Exp', 'all', 0);
+    lb = fitParams{2};
+    ub = fitParams{1};
+    guess = fitParams{3};
+    annealTemp = fitParams{4};
+    sortDwell = sort(dwellTimes);
+    dwellsToFit = sortDwell(1:round(length(sortDwell)));
+    [singleExpParams, logLi]= MEMLETCL(dwellsToFit, userPDF, dataVar, fitVar, lb,ub, guess,annealTemp); % Fit parameters and Log Likelihood output
+    [bootstrapParams, bootstrapLogLi]= MEMLETCL(dwellsToFit, userPDF, dataVar, fitVar, lb,ub, guess,annealTemp, 1000); % Fit parameters and Log Likelihood output
+    paramError = std(bootstrapParams);
+    fitxvals=linspace(0,max(dwellsToFit),10000)'; %create variables for plotting along x
+    oneMinus = exppdfoneminus(fitxvals, singleExpParams);
+    semilogy(fitxvals,oneMinus, 'Color', clr, 'LineWidth', 3 , 'DisplayName',...
+    fitName)
+end
+
+% Double Exp plotting functions
+
+function fittedRates = plotNDoubleCutoff(dwells, cutoffFraction, params, names, colors, markers, boxSpecs, legendSpecs, title)
+    Fig = figure('Position', [100 100 1200 800]);
+    singleFitParams = {'10', '0', '0.1', 30};
+    N = length(names);
+    fittedRates = cell(N,3);
+    str = cell(N);
+    for i = 1:N
+        plotCumDistsOneMinusCutoff(dwells{i}', cutoffFraction, Fig, markers{i}, names{i});
+        pval = hypothesisTesting(dwells{i}, cutoffFraction)
+        if pval > 0.05
+            % Fit Single Exponential
+            [oneMinusFirstParams, error] = plotFitsCutoffOneMinus(Fig, dwells{i}', cutoffFraction, singleFitParams, colors(i, :),legendSpecs, title, names{i});
+            fittedRates{i,1} = names{i};
+            fittedRates{i,2} = oneMinusFirstParams;
+            fittedRates{i,3} = error;
+            str{i} = strcat(names{i}, sprintf(": k = %.3f \\pm %.3f s^{-1}",oneMinusFirstParams, error));
+        else
+            % Fit Double Exponential
+            [oneMinusFirstParams, error] = plotDoubleFitsCutoff(Fig, dwells{i}', cutoffFraction, params{i}, colors(i, :),legendSpecs, title, names{i});
+            fittedRates{i,1} = names{i};
+            fittedRates{i,2} = oneMinusFirstParams;
+            fittedRates{i,3} = error;
+            str{i} = strcat(names{i}, sprintf(":A = %.2f \\pm %.2f s^{-1}, k_1 = %.3f \\pm %.3f s^{-1}, k_2 = %.3f \\pm %.3f s^{-1}", ...
+                oneMinusFirstParams(1),error(1), oneMinusFirstParams(2), error(2), oneMinusFirstParams(3), error(3)));
+        end
+    end
+    t = annotation('textbox',[0.120000000000001 0.11125 0.677499999999999 0.25125],'String',str, 'Interpreter','tex');%,'FitBoxToText','on');
+    t.FontSize = 18;
+    t.FontWeight = 'bold';
+    xlim([0 30])
+    ylim([9e-3 1])
+    set(gca, 'LineWidth', 3, 'FontSize', 22, 'FontWeight', 'bold')
+    set(gca,'OuterPosition', [0 0 0.88 1])
+    % saveas(Fig, strcat(title, ".png"))
 end
 
 function [params, error] = plotDoubleFitsCutoff(fig, dwells, cutoffFraction, fitParams, clr, legendSpecs, Title, fitName)
@@ -607,39 +621,6 @@ function [params, error] = plotDoubleFitsCutoff(fig, dwells, cutoffFraction, fit
     ylabel('CCDF')
     set(gca, 'linewidth', 2, 'fontweight','bold', 'fontsize',16)
     % params;
-end
-
-
-function [singleExpParams] = fitSingleExp(dwellTimes, fitParams, clr, fitName)
-    [userPDF, dataVar, fitVar, ~,~, ~]=PDFList('Single Exp', 'all', 0);
-    lb = fitParams{2};
-    ub = fitParams{1};
-    guess = fitParams{3};
-    annealTemp = fitParams{4};
-    sortDwell = sort(dwellTimes);
-    dwellsToFit = sortDwell(1:round(length(sortDwell)));
-    [singleExpParams, logLi]= MEMLETCL(dwellsToFit, userPDF, dataVar, fitVar, lb,ub, guess,annealTemp); % Fit parameters and Log Likelihood output
-    fitxvals=linspace(0,max(dwellsToFit),10000)'; %create variables for plotting along x
-    oneMinus = exppdfoneminus(fitxvals, singleExpParams);
-    semilogy(fitxvals,oneMinus, 'Color', clr, 'LineWidth', 3 , 'DisplayName',...
-    fitName)
-end
-
-function [singleExpParams, paramError] = fitSingleExpBootstrap(dwellTimes, fitParams, clr, fitName)
-    [userPDF, dataVar, fitVar, ~,~, ~]=PDFList('Single Exp', 'all', 0);
-    lb = fitParams{2};
-    ub = fitParams{1};
-    guess = fitParams{3};
-    annealTemp = fitParams{4};
-    sortDwell = sort(dwellTimes);
-    dwellsToFit = sortDwell(1:round(length(sortDwell)));
-    [singleExpParams, logLi]= MEMLETCL(dwellsToFit, userPDF, dataVar, fitVar, lb,ub, guess,annealTemp); % Fit parameters and Log Likelihood output
-    [bootstrapParams, bootstrapLogLi]= MEMLETCL(dwellsToFit, userPDF, dataVar, fitVar, lb,ub, guess,annealTemp, 1000); % Fit parameters and Log Likelihood output
-    paramError = std(bootstrapParams);
-    fitxvals=linspace(0,max(dwellsToFit),10000)'; %create variables for plotting along x
-    oneMinus = exppdfoneminus(fitxvals, singleExpParams);
-    semilogy(fitxvals,oneMinus, 'Color', clr, 'LineWidth', 3 , 'DisplayName',...
-    fitName)
 end
 
 function [doubleExpParams, paramError] = fitDoubleExpBootstrap(dwellTimes, fitParams, clr, fitName)
