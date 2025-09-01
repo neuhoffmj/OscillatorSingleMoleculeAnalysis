@@ -1,3 +1,4 @@
 *.png
 *.code-workspace
 rates.mat
+simpleRates.mat

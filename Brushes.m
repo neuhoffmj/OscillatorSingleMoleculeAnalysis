@@ -371,8 +371,8 @@ if plotFourSample
             plotDwells{i} = threeStateDwells(i).middleLeftDwells(1, :);
             names{i} = threeStateDwells(i).name{1};
         end
-        plotNDoubleCutoff(plotDwells, cutoffFraction, fourDoubleFitParams, names, cmap,...
-            fourMarkers, foursampleOutsideBox,foursampleLegendSpecs, "Left Time to Bind")
+        leftBindRates = plotNmixed(plotDwells, cutoffFraction, fourDoubleFitParams, names, cmap,...
+            fourMarkers, foursampleOutsideBox,foursampleLegendSpecs, "Left Time to Bind");
         xlim([0 15])
         ylim([1e-2 1])
         saveas(gcf, strcat('plotRates/', 'Brushes Left Time to Bind', ".png"))
@@ -383,8 +383,8 @@ if plotFourSample
             plotDwells{i} = threeStateDwells(i).middleRightDwells(1, :);
             names{i} = threeStateDwells(i).name{1};
         end
-        plotNDoubleCutoff(plotDwells, cutoffFraction, fourDoubleFitParams, names, cmap,...
-            fourMarkers, foursampleOutsideBox,foursampleLegendSpecs, "Right Time to Bind")
+        rightBindRates = plotNmixed(plotDwells, cutoffFraction, fourDoubleFitParams, names, cmap,...
+            fourMarkers, foursampleOutsideBox,foursampleLegendSpecs, "Right Time to Bind");
         xlim([0 15])
         ylim([1e-2 1])
         saveas(gcf, strcat('plotRates/', 'Brushes Right Time to Bind', ".png"))
@@ -394,8 +394,8 @@ if plotFourSample
             plotDwells{i} = threeStateDwells(i).leftDwells(1, :);
             names{i} = threeStateDwells(i).name{1};
         end
-        plotNDoubleCutoff(plotDwells, cutoffFraction, fourDoubleFitParams, names, cmap,...
-            fourMarkers, foursampleOutsideBox,foursampleLegendSpecs, "Left Time to Dissociate")
+        leftDissociateRates = plotNmixed(plotDwells, cutoffFraction, fourDoubleFitParams, names, cmap,...
+            fourMarkers, foursampleOutsideBox,foursampleLegendSpecs, "Left Time to Dissociate");
         xlim([0 15])
         ylim([1e-2 1])
         saveas(gcf, strcat('plotRates/', 'Brushes Left Time to Dissociate', ".png"))
@@ -406,11 +406,16 @@ if plotFourSample
             plotDwells{i} = threeStateDwells(i).rightDwells(1, :);
             names{i} = threeStateDwells(i).name{1};
         end
-        plotNDoubleCutoff(plotDwells, cutoffFraction, fourDoubleFitParams, names, cmap,...
-            fourMarkers, foursampleOutsideBox,foursampleLegendSpecs, "Right Time to Dissociate")
+        rightDissociateRates = plotNmixed(plotDwells, cutoffFraction, fourDoubleFitParams, names, cmap,...
+            fourMarkers, foursampleOutsideBox,foursampleLegendSpecs, "Right Time to Dissociate");
         xlim([0 15])
         ylim([1e-2 1])
         saveas(gcf, strcat('plotRates/', 'Brushes Right Time to Dissociate', ".png"))
+        rateStruct.rightDissociateRates = rightDissociateRates;
+        rateStruct.leftDissociateRates = leftDissociateRates;
+        rateStruct.rightBindRates = rightBindRates;
+        rateStruct.leftBindRates = leftBindRates;
+        save('simpleRates.mat', 'rateStruct');
     end
     if plotNonMarkov
         for sample = 1:numSamples
@@ -420,7 +425,7 @@ if plotFourSample
             names = {'$K_{LUL}$', '$K_{RUL}$'};
             twoMarkers = {'ks', 'ko'};
             plotDwells = {threeStateDwells(sample).middleLeftRebindDwells(1, :), threeStateDwells(sample).middleRightLeftTransitionDwells(1, :)};
-            plotNDoubleCutoff(plotDwells, cutoffFraction, twoSingleFitParams, names, cmap, twoMarkers, foursampleOutsideBox, foursampleLegendSpecs, strcat(threeStateDwells(sample).name, ' Left Complex Rates'))
+            plotNmixed(plotDwells, cutoffFraction, twoSingleFitParams, names, cmap, twoMarkers, foursampleOutsideBox, foursampleLegendSpecs, strcat(threeStateDwells(sample).name, ' Left Complex Rates'))
             ylim([1e-2 1])
             xlim([0 15])
             saveas(gcf, strcat('plotRates/complexRates/', threeStateDwells(sample).name, 'Left Complex Rates', ".png"))
@@ -431,7 +436,7 @@ if plotFourSample
             names = {'$K_{RUR}$', '$K_{LUR}$'};
             twoMarkers = {'ks', 'ko'};
             plotDwells = {threeStateDwells(sample).middleRightRebindDwells(1, :), threeStateDwells(sample).middleLeftRightTransitionDwells(1, :)};
-            plotNDoubleCutoff(plotDwells, cutoffFraction, twoSingleFitParams, names, cmap, twoMarkers, foursampleOutsideBox, foursampleLegendSpecs, strcat(threeStateDwells(sample).name, ' Right Complex Rates'))
+            plotNmixed(plotDwells, cutoffFraction, twoSingleFitParams, names, cmap, twoMarkers, foursampleOutsideBox, foursampleLegendSpecs, strcat(threeStateDwells(sample).name, ' Right Complex Rates'))
             ylim([1e-2 1])
             xlim([0 15])
             saveas(gcf, strcat('plotRates/complexRates/', threeStateDwells(sample).name, 'Right Complex Rates', ".png"))
@@ -526,7 +531,7 @@ function [params, error] = plotFitsCutoffOneMinus(fig, dwells, cutoffFraction, f
     dwellTimeCutoff = min(CumDistTimes(CumDist>=cutoffFraction));
     sortDwells = sort(dwells);
     [params, error] = fitSingleExpBootstrap(dwells(dwells<dwellTimeCutoff), fitParams, clr, fitName);
-    lgd = legend('Location', legendSpecs, 'Interpreter','latex');
+    lgd = legend('Location', legendSpecs, 'Interpreter','tex');
     % title(lgd, 'Brush Lengths')
     title(Title, 'Interpreter','none')
     xlabel('Time (s)')
@@ -571,8 +576,8 @@ end
 
 % Double Exp plotting functions
 
-function fittedRates = plotNDoubleCutoff(dwells, cutoffFraction, params, names, colors, markers, boxSpecs, legendSpecs, title)
-    Fig = figure('Position', [100 100 1200 800]);
+function fittedRates = plotNmixed(dwells, cutoffFraction, params, names, colors, markers, boxSpecs, legendSpecs, title)
+    Fig = figure('Position', [50 50 1200 1080]);
     singleFitParams = {'10', '0', '0.1', 30};
     N = length(names);
     fittedRates = cell(N,3);
@@ -597,13 +602,14 @@ function fittedRates = plotNDoubleCutoff(dwells, cutoffFraction, params, names, 
                 oneMinusFirstParams(1),error(1), oneMinusFirstParams(2), error(2), oneMinusFirstParams(3), error(3)));
         end
     end
-    t = annotation('textbox',[0.120000000000001 0.11125 0.677499999999999 0.25125],'String',str, 'Interpreter','tex');%,'FitBoxToText','on');
+    t = annotation('textbox',[0.120833333333334 0.0126849894291755 0.690833333333332 0.210280126849895],'String',str, 'Interpreter','tex');%,'FitBoxToText','on');
     t.FontSize = 18;
     t.FontWeight = 'bold';
     xlim([0 30])
     ylim([9e-3 1])
-    set(gca, 'LineWidth', 3, 'FontSize', 22, 'FontWeight', 'bold')
-    set(gca,'OuterPosition', [0 0 0.88 1])
+    set(gca, 'LineWidth', 3, 'FontSize', 28, 'FontWeight', 'bold')
+    set(gca,'OuterPosition', [0 0.22 0.88 0.78])
+    set(gca,'linewidth',6)
     % saveas(Fig, strcat(title, ".png"))
 end
 
@@ -614,7 +620,7 @@ function [params, error] = plotDoubleFitsCutoff(fig, dwells, cutoffFraction, fit
     dwellTimeCutoff = min(CumDistTimes(CumDist>=cutoffFraction));
     sortDwells = sort(dwells);
     [params, error] = fitDoubleExpBootstrap(dwells(dwells<dwellTimeCutoff), fitParams, clr, fitName);
-    lgd = legend('Location', legendSpecs, 'Interpreter','latex');
+    lgd = legend('Location', legendSpecs, 'Interpreter','tex');
     % title(lgd, 'Brush Lengths')
     title(Title, 'Interpreter','none')
     xlabel('Time (s)')
