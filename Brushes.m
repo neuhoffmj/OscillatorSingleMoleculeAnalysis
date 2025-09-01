@@ -24,14 +24,14 @@ numBins = 20;
 
 doPlotTraces = 0; % Plot a Selection of Traces?
 plotTraces = {[41],...
-    [1],[5],[12]}; 
+    [1],[5],[12]};
 
 %% Loading Data
 dualData = {'0_0' '0_10' '30_0' '30_10';...
     [], [], [],[]; % Left (Cy5) Path [2]
     [], [], [],[]; % Left (Cy5) Raw "FRET" [3]
-    [], [], [],[]; % Right (Cy3) Path [4] 
-    [], [], [],[]; % Right (Cy3) Raw "FRET" [5] 
+    [], [], [],[]; % Right (Cy3) Path [4]
+    [], [], [],[]; % Right (Cy3) Raw "FRET" [5]
     [], [], [],[]}; % Three State [6]
 numSamples = size(dualData, 2);
 dualNames = {'0_0', '0_10', '30_0', '30_10'};
@@ -83,14 +83,14 @@ for i=1:size(dualData, 2)
     HMMright = HMMright.path;
     Rawright = load(cy3File, "FRET");
     Rawright = Rawright.FRET;
-
+    
     if doExcludeTraces
         HMMleft(dualExcludeTraces{i}) = [];
         HMMright(dualExcludeTraces{i}) = [];
         Rawleft(dualExcludeTraces{i}) = [];
         Rawright(dualExcludeTraces{i}) = [];
     end
-
+    
     % Compute Threestate traces
     % i is sample number, k is number of traces in i'th sample, j is frame
     % of k'th trace
@@ -192,12 +192,12 @@ for i=1:size(dualData, 2)
     simpleDualDwells(i).leftHigh = leftThigh;
     simpleDualDwells(i).leftThighInd = leftThighInd;
     simpleDualDwells(i).leftThighInd = leftThighInd;
-
+    
     disp(strcat('Sample ', threeStateDwells(i).name{1}))
     [leftDwells, rightDwells, middleLeftRebindDwells, middleRightRebindDwells, ...
-    middleLeftRightTransitionDwells, middleRightLeftTransitionDwells, fastFlopsLR, fastFlopsRL] = eb_dwelltimes_dualquench_bothbound(dualData{2, i}, dualData{4, i}, dualSecPerFrame);
+        middleLeftRightTransitionDwells, middleRightLeftTransitionDwells, fastFlopsLR, fastFlopsRL] = eb_dwelltimes_dualquench_bothbound(dualData{2, i}, dualData{4, i}, dualSecPerFrame);
     threeStateDwells(i).leftDwells = leftDwells;
-    threeStateDwells(i).rightDwells = rightDwells; 
+    threeStateDwells(i).rightDwells = rightDwells;
     threeStateDwells(i).middleLeftRebindDwells = middleLeftRebindDwells;
     threeStateDwells(i).middleRightRebindDwells = middleRightRebindDwells;
     if appendFastFlops
@@ -214,19 +214,19 @@ for i=1:size(dualData, 2)
     threeStateDwells(i).middleRightDwells = [middleRightRebindDwells middleLeftRightTransitionDwells];
     threeStateDwells(i).fastFlopsLR = fastFlopsLR;
     threeStateDwells(i).fastFlopsRL = fastFlopsRL;
-        
+    
     [~, rightThigh, rightTlow, rightThighInd, rightTlowInd, ~, ~, ~, ~] = eb_dwelltimes_traceInd_MN(dualData{4, i}', dualSecPerFrame);
     simpleDualDwells(i).rightLow = rightTlow;
     simpleDualDwells(i).rightTlowInd = rightTlowInd;
     simpleDualDwells(i).rightHigh = rightThigh;
-    simpleDualDwells(i).rightThighInd = rightThighInd;    
-
+    simpleDualDwells(i).rightThighInd = rightThighInd;
+    
     numTraces = max(leftTlowInd);
     for j = 1:numTraces
         simpleDualDwells(i).leftMeanTlow(j) = mean(leftTlow(leftTlowInd == j));
         simpleDualDwells(i).leftMeanThigh(j) = mean(leftThigh(leftThighInd == j));
         simpleDualDwells(i).rightMeanTlow(j) = mean(rightTlow(rightTlowInd == j));
-        simpleDualDwells(i).rightMeanThigh(j) = mean(rightThigh(rightThighInd == j));        
+        simpleDualDwells(i).rightMeanThigh(j) = mean(rightThigh(rightThighInd == j));
     end
 end
 
@@ -244,7 +244,7 @@ if plotDwellScatter
         ylim([0 210])
         title(strcat(simpleDualDwells(i).name, " Left"), 'Interpreter','none')
         set(gca,'fontweight','bold', 'FontSize', 14)
-    
+        
         subplot(2,numSamples,i*2)
         scatter(simpleDualDwells(i).rightMeanTlow, simpleDualDwells(i).rightMeanThigh, 'LineWidth',2)
         grid on
@@ -306,7 +306,7 @@ end
 %% Plotting Dwell Time Histograms
 if doPlotHists
     % bins = 0:1:max(singleLeftTlow(1, :));
-     % Simple Dual Avg. Dwell Times
+    % Simple Dual Avg. Dwell Times
     simpleDualAvgDwells = figure('Position', [10 100 1900 900]);
     for i=1:numSamples
         bins = 0:1:max(simpleDualDwells(i).leftLow(1, :));
@@ -319,7 +319,7 @@ if doPlotHists
         ylim([0 210])
         title(strcat(simpleDualDwells(i).name, " Left"), 'Interpreter','none')
         set(gca,'fontweight','bold', 'FontSize', 14)
-    
+        
         subplot(2,numSamples,i*2)
         scatter(simpleDualDwells(i).rightMeanTlow, simpleDualDwells(i).rightMeanThigh, 'LineWidth',2)
         grid on
@@ -339,7 +339,7 @@ if doPlotHists
     title(sprintf('High Dwell Times (N = %d)', numHighDwells))
     sgtitle(strcat(side, " Side Dwell Times (", bp, ' bp', movieLength, sprintf(", %d Hz)", frameRate)), 'Interpreter','none')
     saveas(f1, strcat(bp, " Histograms.png"))
-
+    
     %% Low dwell time greater than t histogram
     ehist = zeros(1,size(bins,2));
     for i = 1:size(bins,2)
@@ -352,7 +352,7 @@ end
 ub = '1,10,10';
 lb = '0,0.001,0.001';
 guess = '0.5,1.5,.05';
-annealTemp=30;  
+annealTemp=30;
 fitParams = {ub, lb, guess, annealTemp};
 singleFitParams = {'10', '0', '0.1', annealTemp};
 
@@ -361,6 +361,7 @@ if plotFourSample
         % Binding
         cmap = linspecer(4);
         fourSingleFitParams = {singleFitParams; singleFitParams; singleFitParams; singleFitParams};
+        fourDoubleFitParams = {fitParams; fitParams; fitParams; fitParams};
         fourMarkers = {'ks', 'ko', 'k*', 'kx'};
         numSamples = size(threeStateDwells, 2);
         plotDwells = cell(numSamples, 1);
@@ -369,7 +370,7 @@ if plotFourSample
             plotDwells{i} = threeStateDwells(i).middleLeftDwells(1, :);
             names{i} = threeStateDwells(i).name{1};
         end
-        plotNSingleCutoff(plotDwells, cutoffFraction, fourSingleFitParams, names, cmap,...
+        plotNDoubleCutoff(plotDwells, cutoffFraction, fourDoubleFitParams, names, cmap,...
             fourMarkers, foursampleOutsideBox,foursampleLegendSpecs, "Left Time to Bind")
         xlim([0 15])
         ylim([1e-2 1])
@@ -381,30 +382,30 @@ if plotFourSample
             plotDwells{i} = threeStateDwells(i).middleRightDwells(1, :);
             names{i} = threeStateDwells(i).name{1};
         end
-        plotNSingleCutoff(plotDwells, cutoffFraction, fourSingleFitParams, names, cmap,...
+        plotNDoubleCutoff(plotDwells, cutoffFraction, fourDoubleFitParams, names, cmap,...
             fourMarkers, foursampleOutsideBox,foursampleLegendSpecs, "Right Time to Bind")
         xlim([0 15])
         ylim([1e-2 1])
         saveas(gcf, strcat('plotRates/', 'Brushes Right Time to Bind', ".png"))
-
+        
         % Dissociation
         for i = 1:numSamples
             plotDwells{i} = threeStateDwells(i).leftDwells(1, :);
             names{i} = threeStateDwells(i).name{1};
         end
-        plotNSingleCutoff(plotDwells, cutoffFraction, fourSingleFitParams, names, cmap,...
+        plotNDoubleCutoff(plotDwells, cutoffFraction, fourDoubleFitParams, names, cmap,...
             fourMarkers, foursampleOutsideBox,foursampleLegendSpecs, "Left Time to Dissociate")
         xlim([0 15])
         ylim([1e-2 1])
         saveas(gcf, strcat('plotRates/', 'Brushes Left Time to Dissociate', ".png"))
-
+        
         plotDwells = cell(numSamples, 1);
         names = cell(numSamples, 1);
         for i = 1:numSamples
             plotDwells{i} = threeStateDwells(i).rightDwells(1, :);
             names{i} = threeStateDwells(i).name{1};
         end
-        plotNSingleCutoff(plotDwells, cutoffFraction, fourSingleFitParams, names, cmap,...
+        plotNDoubleCutoff(plotDwells, cutoffFraction, fourDoubleFitParams, names, cmap,...
             fourMarkers, foursampleOutsideBox,foursampleLegendSpecs, "Right Time to Dissociate")
         xlim([0 15])
         ylim([1e-2 1])
@@ -418,18 +419,18 @@ if plotFourSample
             names = {'$K_{LUL}$', '$K_{RUL}$'};
             twoMarkers = {'ks', 'ko'};
             plotDwells = {threeStateDwells(sample).middleLeftRebindDwells(1, :), threeStateDwells(sample).middleRightLeftTransitionDwells(1, :)};
-            plotNSingleCutoff(plotDwells, cutoffFraction, twoSingleFitParams, names, cmap, twoMarkers, foursampleOutsideBox, foursampleLegendSpecs, strcat(threeStateDwells(sample).name, ' Left Complex Rates'))
+            plotNDoubleCutoff(plotDwells, cutoffFraction, twoSingleFitParams, names, cmap, twoMarkers, foursampleOutsideBox, foursampleLegendSpecs, strcat(threeStateDwells(sample).name, ' Left Complex Rates'))
             ylim([1e-2 1])
             xlim([0 15])
             saveas(gcf, strcat('plotRates/complexRates/', threeStateDwells(sample).name, 'Left Complex Rates', ".png"))
-        
+            
             % Plot Right Markov
             cmap = linspecer(2);
             twoSingleFitParams = {singleFitParams; singleFitParams};
             names = {'$K_{RUR}$', '$K_{LUR}$'};
             twoMarkers = {'ks', 'ko'};
             plotDwells = {threeStateDwells(sample).middleRightRebindDwells(1, :), threeStateDwells(sample).middleLeftRightTransitionDwells(1, :)};
-            plotNSingleCutoff(plotDwells, cutoffFraction, twoSingleFitParams, names, cmap, twoMarkers, foursampleOutsideBox, foursampleLegendSpecs, strcat(threeStateDwells(sample).name, ' Right Complex Rates'))
+            plotNDoubleCutoff(plotDwells, cutoffFraction, twoSingleFitParams, names, cmap, twoMarkers, foursampleOutsideBox, foursampleLegendSpecs, strcat(threeStateDwells(sample).name, ' Right Complex Rates'))
             ylim([1e-2 1])
             xlim([0 15])
             saveas(gcf, strcat('plotRates/complexRates/', threeStateDwells(sample).name, 'Right Complex Rates', ".png"))
@@ -456,7 +457,7 @@ for i =1:4
     end
 end
 
-%% Make Rate Bar Plots
+%% Make Brushless Rate Bar Plots
 load('rates.mat', 'fittedRates');
 % Extract names, rates, and errors for all entries
 primaryNames = fittedRates(1:4,1);
@@ -492,7 +493,7 @@ set(gca, 'FontWeight', 'bold', 'FontSize', 14)
 saveas(gcf, 'plotRates/Complex_Rates.png')
 
 %% Plotting Functions
- 
+
 function plotOneSingleExpCutoff(dwells, cutoffFraction, params, names, colors, markers, boxSpecs, legendSpecs, title)
     Fig = figure('Position', [100 100 1500 800]);
     N = length(names);
@@ -521,6 +522,29 @@ function fittedRates = plotNSingleCutoff(dwells, cutoffFraction, params, names, 
     for i = 1:N
         plotCumDistsOneMinusCutoff(dwells{i}', cutoffFraction, Fig, markers{i}, names{i});
         [oneMinusFirstParams, error] = plotFitsCutoffOneMinus(Fig, dwells{i}', cutoffFraction, params{i}, colors(i, :),legendSpecs, title, names{i});
+        fittedRates{i,1} = names{i};
+        fittedRates{i,2} = oneMinusFirstParams;
+        fittedRates{i,3} = error;
+        str{i} = strcat(names{i}, sprintf(": k = %.3f \\pm %.3f s^{-1}",oneMinusFirstParams, error));
+    end
+    t = annotation('textbox',[0.495 0.13 0.293333333333334 0.13375],'String',str, 'Interpreter','tex');%,'FitBoxToText','on');
+    t.FontSize = 18;
+    t.FontWeight = 'bold';
+    xlim([0 30])
+    ylim([9e-3 1])
+    set(gca, 'LineWidth', 3, 'FontSize', 22, 'FontWeight', 'bold')
+    set(gca,'OuterPosition', [0 0 0.88 1])
+    % saveas(Fig, strcat(title, ".png"))
+end
+
+function fittedRates = plotNDoubleCutoff(dwells, cutoffFraction, params, names, colors, markers, boxSpecs, legendSpecs, title)
+    Fig = figure('Position', [100 100 1200 800]);
+    N = length(names);
+    fittedRates = cell(N,3);
+    str = cell(N);
+    for i = 1:N
+        plotCumDistsOneMinusCutoff(dwells{i}', cutoffFraction, Fig, markers{i}, names{i});
+        [oneMinusFirstParams, error] = plotDoubleFitsCutoff(Fig, dwells{i}', cutoffFraction, params{i}, colors(i, :),legendSpecs, title, names{i});
         fittedRates{i,1} = names{i};
         fittedRates{i,2} = oneMinusFirstParams;
         fittedRates{i,3} = error;
@@ -569,6 +593,22 @@ function [params, error] = plotFitsCutoffOneMinus(fig, dwells, cutoffFraction, f
     % params;
 end
 
+function [params, error] = plotDoubleFitsCutoff(fig, dwells, cutoffFraction, fitParams, clr, legendSpecs, Title, fitName)
+    fig = figure(fig);
+    [CumDist, CumDistTimes] = ecdf(dwells);
+    CumDistTimes(1) = 0;
+    dwellTimeCutoff = min(CumDistTimes(CumDist>=cutoffFraction));
+    sortDwells = sort(dwells);
+    [params, error] = fitDoubleExpBootstrap(dwells(dwells<dwellTimeCutoff), fitParams, clr, fitName);
+    lgd = legend('Location', legendSpecs, 'Interpreter','latex');
+    % title(lgd, 'Brush Lengths')
+    title(Title, 'Interpreter','none')
+    xlabel('Time (s)')
+    ylabel('CCDF')
+    set(gca, 'linewidth', 2, 'fontweight','bold', 'fontsize',16)
+    % params;
+end
+
 
 function [singleExpParams] = fitSingleExp(dwellTimes, fitParams, clr, fitName)
     [userPDF, dataVar, fitVar, ~,~, ~]=PDFList('Single Exp', 'all', 0);
@@ -582,7 +622,7 @@ function [singleExpParams] = fitSingleExp(dwellTimes, fitParams, clr, fitName)
     fitxvals=linspace(0,max(dwellsToFit),10000)'; %create variables for plotting along x
     oneMinus = exppdfoneminus(fitxvals, singleExpParams);
     semilogy(fitxvals,oneMinus, 'Color', clr, 'LineWidth', 3 , 'DisplayName',...
-        fitName)
+    fitName)
 end
 
 function [singleExpParams, paramError] = fitSingleExpBootstrap(dwellTimes, fitParams, clr, fitName)
@@ -598,6 +638,23 @@ function [singleExpParams, paramError] = fitSingleExpBootstrap(dwellTimes, fitPa
     paramError = std(bootstrapParams);
     fitxvals=linspace(0,max(dwellsToFit),10000)'; %create variables for plotting along x
     oneMinus = exppdfoneminus(fitxvals, singleExpParams);
+    semilogy(fitxvals,oneMinus, 'Color', clr, 'LineWidth', 3 , 'DisplayName',...
+    fitName)
+end
+
+function [doubleExpParams, paramError] = fitDoubleExpBootstrap(dwellTimes, fitParams, clr, fitName)
+    [userPDF, dataVar, fitVar, ~,~, ~]=PDFList('Double Exp (Independent)', 'all', 0);
+    lb = fitParams{2};
+    ub = fitParams{1};
+    guess = fitParams{3};
+    annealTemp = fitParams{4};
+    sortDwell = sort(dwellTimes);
+    dwellsToFit = sortDwell(1:round(length(sortDwell)));
+    [doubleExpParams, logLi]= MEMLETCL(dwellsToFit, userPDF, dataVar, fitVar, lb,ub, guess,annealTemp); % Fit parameters and Log Likelihood output
+    [bootstrapParams, bootstrapLogLi]= MEMLETCL(dwellsToFit, userPDF, dataVar, fitVar, lb,ub, guess,annealTemp, 1000); % Fit parameters and Log Likelihood output
+    paramError = std(bootstrapParams);
+    fitxvals=linspace(0,max(dwellsToFit),10000)'; %create variables for plotting along x
+    oneMinus = dbexppdfnotminoneminus(fitxvals, doubleExpParams);
     semilogy(fitxvals,oneMinus, 'Color', clr, 'LineWidth', 3 , 'DisplayName',...
         fitName)
 end
@@ -622,10 +679,8 @@ function pval = hypothesisTesting(dwellTimes, cutoff)
     lb = '0,0.001,0.001';
     guess = '0.5,1,.1';
     [doubleExpParams, doubleLogL] = MEMLETCL(dwellSubset', userPDF, dataVar, fitVar, lb,ub, guess,annealTemp); % Fit parameters and Log Likelihood output
-
     delDF = 2; %% two constraints on double exp yields single exp, hence 2
     RLL=-2*(singleLogL-doubleLogL); % the log of the ratio of  the likelihoods
-
     pval=1-chi2cdf(RLL,delDF); %calculate a p-value from the chi2cdf
     % disp(singleLogL)
     % disp(doubleLogL)
@@ -637,23 +692,22 @@ function pval = hypothesisTesting(dwellTimes, cutoff)
     % else
     %     plow = num2str(plow);
     % end
-
 end
 
 function [] = slider_plot(leftRaw, leftHMM, rightRaw, rightHMM, dualHMM, secPerFrame, titlestr)
     % Plot different plots according to slider location.
     S.fh = figure('units','pixels',...
-                  'position',[50 50 1360 870],...
-                  'menubar','none',...
-                  'name','slider_plot',...
-                  'numbertitle','off',...
-                  'resize','off');  
+        'position',[50 50 1360 870],...
+        'menubar','none',...
+        'name','slider_plot',...
+        'numbertitle','off',...
+        'resize','off');
     set(S.fh, 'Name', titlestr);
     S.ax1 = axes('unit','pix','position',[120 80 1200 200]);
     S.ax2 = axes('unit','pix','position',[120 80+280 1200 200]);
     S.ax3 = axes('unit','pix','position',[120 80+2*280 1200 200]);
 
-     for a =[S.ax1 S.ax2 S.ax3]
+    for a =[S.ax1 S.ax2 S.ax3]
         cla(a)
         hold(a, 'on')
     end
@@ -686,15 +740,15 @@ function [] = slider_plot(leftRaw, leftHMM, rightRaw, rightHMM, dualHMM, secPerF
     saveas(S.fh, "trace.png")
 
     S.sl = uicontrol('style','slide',...
-                     'unit','pix',...
-                     'position',[0 10 1200 30],...
-                     'min',1,'max',size(dualHMM,2),'val',1,...
-                     'sliderstep',[1/size(dualHMM,2) 1/size(dualHMM,2)],...
-                     'callback',{@sl_call,S, leftRaw, leftHMM, rightRaw, rightHMM, dualHMM, secPerFrame});  
+    'unit','pix',...
+    'position',[0 10 1200 30],...
+    'min',1,'max',size(dualHMM,2),'val',1,...
+    'sliderstep',[1/size(dualHMM,2) 1/size(dualHMM,2)],...
+    'callback',{@sl_call,S, leftRaw, leftHMM, rightRaw, rightHMM, dualHMM, secPerFrame});
 end
 
 function [] = sl_call(varargin)
-% Callback for the slider.
+    % Callback for the slider.
     [h,S] = varargin{[1,3]};  % calling handle and data structure.
     leftRaw = varargin{4};
     leftHMM = varargin{5};
@@ -710,7 +764,7 @@ function [] = sl_call(varargin)
         cla(a)
         hold(a, 'on')
     end
-    
+
     plot(S.ax3, seconds, leftHMM{traceNum}', '-','LineWidth', 2, 'Color',[0.4 0 0], DisplayName="Left Quenching HMM")
     xlabel(S.ax3,'Time (s)')
     ylabel(S.ax3,'Cy5 Emission')
@@ -735,11 +789,10 @@ function [] = sl_call(varargin)
     for a =[S.ax2 S.ax3]
         legend(a)
     end
-
 end
 
 function [] = sl2_call(varargin)
-% Callback for the slider.
+    % Callback for the slider.
     [h,S] = varargin{[1,3]};  % calling handle and data structure.
     raw = varargin{4};
     HMM = varargin{5};
@@ -750,12 +803,12 @@ function [] = sl2_call(varargin)
     fluor = varargin{10};
     % cla
     traceNum = round(get(h,'value'));
-    
+
     for a =[S.ax1 S.ax2 S.ax3]
         cla(a)
         hold(a, 'on')
     end
-    
+
     seconds = 0:secPerFrame:(size(raw{traceNum}, 1)-1)*secPerFrame;
     plot(S.ax3, seconds, raw{traceNum}', '-','LineWidth', 2, 'Color',rawclr, DisplayName=strcat(side, " Quenching raw"))
     xlabel(S.ax3,'Time (s)')
@@ -765,12 +818,12 @@ function [] = sl2_call(varargin)
     plot(S.ax2, seconds, HMM{traceNum}, '-','LineWidth', 2,'Color',HMMclr, DisplayName=strcat(side, " Quenching HMM"))
     xlabel(S.ax2,'Time (s)')
     ylabel(S.ax2,strcat(fluor, ' Emission'))
-    
+
     % Three State HMM PLot
     plot(S.ax1, seconds, raw{traceNum}', '-','LineWidth', 2, 'Color',rawclr, DisplayName=strcat(side, " Quenching raw"))
     xlabel(S.ax1,'Time (s)')
     ylabel(S.ax1,strcat(fluor, ' Emission'))
-    
+
     plot(S.ax1, seconds, HMM{traceNum}, '-','LineWidth', 2,'Color',HMMclr, DisplayName=strcat(side, " Quenching HMM"))
     xlabel(S.ax1,'Time (s)')
     ylabel(S.ax1,strcat(fluor, ' Emission'))
@@ -778,5 +831,4 @@ function [] = sl2_call(varargin)
     for a =[S.ax1 S.ax2 S.ax3]
         legend(a)
     end
-
 end
