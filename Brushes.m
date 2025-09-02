@@ -2,6 +2,7 @@ clc;
 clear;
 close all;
 warning('off', 'MATLAB:handle_graphics:exceptions:SceneNode');
+tic
 
 dualframeRate = 10; % Hz or fps
 movieLength = "5 Minutes";
@@ -17,11 +18,13 @@ plotTotalTimeHistograms = 0;
 cutoffFraction = 0.95;
 doPlotHists = 0;
 appendFastFlops = 0;
-plotFourSample = 1;
+plotBrushesSamples = 1;
 plotNonMarkov = 0;
 plotSimpleRates = 1;
 numBins = 20;
 barPlots = 0;
+brushBarPlots = 1;
+printHypothesisTest = 0;
 
 doPlotTraces = 0; % Plot a Selection of Traces?
 plotTraces = {[41],...
@@ -357,7 +360,7 @@ annealTemp=30;
 fitParams = {ub, lb, guess, annealTemp};
 singleFitParams = {'10', '0', '0.1', annealTemp};
 
-if plotFourSample
+if plotBrushesSamples
     if plotSimpleRates
         % Binding
         cmap = linspecer(4);
@@ -444,22 +447,24 @@ if plotFourSample
     end
 end
 
-for i =1:4
-    p1 = hypothesisTesting(threeStateDwells(i).middleLeftDwells(1,:), cutoffFraction);
-    if (p1>0.05)
-        disp(strcat(threeStateDwells(i).name, " Left Bind Dwells"))
-    end
-    p2 = hypothesisTesting(threeStateDwells(i).middleRightDwells(1,:), cutoffFraction);
-    if (p2>0.05)
-        disp(strcat(threeStateDwells(i).name, " Right Bind Dwells"))
-    end
-    p3 = hypothesisTesting(threeStateDwells(i).leftDwells(1,:), cutoffFraction);
-    if (p3>0.05)
-        disp(strcat(threeStateDwells(i).name, " Left Dwells"))
-    end
-    p4 = hypothesisTesting(threeStateDwells(i).rightDwells(1,:), cutoffFraction);
-    if (p4>0.05)
-        disp(strcat(threeStateDwells(i).name, " Right Dwells"))
+if printHypothesisTest
+    for i =1:4
+        p1 = hypothesisTesting(threeStateDwells(i).middleLeftDwells(1,:), cutoffFraction);
+        if (p1>0.05)
+            disp(strcat(threeStateDwells(i).name, " Left Bind Dwells"))
+        end
+        p2 = hypothesisTesting(threeStateDwells(i).middleRightDwells(1,:), cutoffFraction);
+        if (p2>0.05)
+            disp(strcat(threeStateDwells(i).name, " Right Bind Dwells"))
+        end
+        p3 = hypothesisTesting(threeStateDwells(i).leftDwells(1,:), cutoffFraction);
+        if (p3>0.05)
+            disp(strcat(threeStateDwells(i).name, " Left Dwells"))
+        end
+        p4 = hypothesisTesting(threeStateDwells(i).rightDwells(1,:), cutoffFraction);
+        if (p4>0.05)
+            disp(strcat(threeStateDwells(i).name, " Right Dwells"))
+        end
     end
 end
 
@@ -499,6 +504,14 @@ if barPlots
     set(gca, 'FontWeight', 'bold', 'FontSize', 14)
     saveas(gcf, 'plotRates/Complex_Rates.png')
 end
+toc
+
+if brushBarPlots
+    load('simpleRates.mat', 'rateStruct');
+
+end
+
+
 %% Plotting Functions
 % Single exp plotting functions
 function fittedRates = plotNSingleCutoff(dwells, cutoffFraction, params, names, colors, markers, boxSpecs, legendSpecs, title)
@@ -553,7 +566,7 @@ function fig = plotCumDistsOneMinusCutoff(dwells, cutoff, fig, mk, displayName)
     else
         fig = figure(fig);
     end
-    semilogy(CumDistTimes, 1-CumDist, mk, 'DisplayName',displayName, 'LineWidth',2, 'MarkerSize',10)
+    semilogy(CumDistTimes, 1-CumDist, mk, 'DisplayName',displayName, 'LineWidth',4, 'MarkerSize',18)
     hold on
 end
 
@@ -570,7 +583,7 @@ function [singleExpParams, paramError] = fitSingleExpBootstrap(dwellTimes, fitPa
     paramError = std(bootstrapParams);
     fitxvals=linspace(0,max(dwellsToFit),10000)'; %create variables for plotting along x
     oneMinus = exppdfoneminus(fitxvals, singleExpParams);
-    semilogy(fitxvals,oneMinus, 'Color', clr, 'LineWidth', 3 , 'DisplayName',...
+    semilogy(fitxvals,oneMinus, 'Color', clr, 'LineWidth', 6 , 'DisplayName',...
     fitName)
 end
 
@@ -598,18 +611,17 @@ function fittedRates = plotNmixed(dwells, cutoffFraction, params, names, colors,
             fittedRates{i,1} = names{i};
             fittedRates{i,2} = oneMinusFirstParams;
             fittedRates{i,3} = error;
-            str{i} = strcat(names{i}, sprintf(":A = %.2f \\pm %.2f s^{-1}, k_1 = %.3f \\pm %.3f s^{-1}, k_2 = %.3f \\pm %.3f s^{-1}", ...
+            str{i} = strcat(names{i}, sprintf(": A = %.2f \\pm %.2f, k_1 = %.3f \\pm %.3f s^{-1}, k_2 = %.3f \\pm %.3f s^{-1}", ...
                 oneMinusFirstParams(1),error(1), oneMinusFirstParams(2), error(2), oneMinusFirstParams(3), error(3)));
         end
     end
     t = annotation('textbox',[0.120833333333334 0.0126849894291755 0.690833333333332 0.210280126849895],'String',str, 'Interpreter','tex');%,'FitBoxToText','on');
-    t.FontSize = 18;
+    t.FontSize = 19;
     t.FontWeight = 'bold';
     xlim([0 30])
     ylim([9e-3 1])
-    set(gca, 'LineWidth', 3, 'FontSize', 28, 'FontWeight', 'bold')
+    set(gca, 'LineWidth', 8, 'FontSize', 28, 'FontWeight', 'bold')
     set(gca,'OuterPosition', [0 0.22 0.88 0.78])
-    set(gca,'linewidth',6)
     % saveas(Fig, strcat(title, ".png"))
 end
 
@@ -638,11 +650,24 @@ function [doubleExpParams, paramError] = fitDoubleExpBootstrap(dwellTimes, fitPa
     sortDwell = sort(dwellTimes);
     dwellsToFit = sortDwell(1:round(length(sortDwell)));
     [doubleExpParams, logLi]= MEMLETCL(dwellsToFit, userPDF, dataVar, fitVar, lb,ub, guess,annealTemp); % Fit parameters and Log Likelihood output
+    % Reorder parameters for actual fit so fastest rate is k1
+    if doubleExpParams(2)<doubleExpParams(3)
+        temp = doubleExpParams(2);
+        doubleExpParams(2) = doubleExpParams(3);
+        doubleExpParams(3) = temp;
+        doubleExpParams(1) = 1-doubleExpParams(1);
+    end
     [bootstrapParams, bootstrapLogLi]= MEMLETCL(dwellsToFit, userPDF, dataVar, fitVar, lb,ub, guess,annealTemp, 1000); % Fit parameters and Log Likelihood output
+    % Re-order parameters in bootstrap matrix to keep fastest rate as k1
+    misorderedRates = bootstrapParams(:,2)<bootstrapParams(:,3);
+    orderedBootstrapParams = bootstrapParams;
+    orderedBootstrapParams(misorderedRates,2) = bootstrapParams(misorderedRates,3);
+    orderedBootstrapParams(misorderedRates,3) = bootstrapParams(misorderedRates,2);
+    orderedBootstrapParams(misorderedRates,1) = 1-bootstrapParams(misorderedRates,1);
     paramError = std(bootstrapParams);
     fitxvals=linspace(0,max(dwellsToFit),10000)'; %create variables for plotting along x
     oneMinus = dbexppdfnotminoneminus(fitxvals, doubleExpParams);
-    semilogy(fitxvals,oneMinus, 'Color', clr, 'LineWidth', 3 , 'DisplayName',...
+    semilogy(fitxvals,oneMinus, 'Color', clr, 'LineWidth', 6 , 'DisplayName',...
         fitName)
 end
 
