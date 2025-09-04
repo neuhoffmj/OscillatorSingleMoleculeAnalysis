@@ -356,7 +356,7 @@ end
 ub = '1,10,10';
 lb = '0,0.001,0.001';
 guess = '0.5,1.5,.05';
-annealTemp=30;
+annealTemp=20;
 fitParams = {ub, lb, guess, annealTemp};
 singleFitParams = {'10', '0', '0.1', annealTemp};
 
