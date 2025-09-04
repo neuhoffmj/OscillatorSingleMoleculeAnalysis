@@ -508,9 +508,58 @@ toc
 
 if brushBarPlots
     load('simpleRates.mat', 'rateStruct');
+    % Plot Dissociation Rates   
+    barPlotBrushRates(rateStruct.leftDissociateRates(:,1), cell2mat(rateStruct.leftDissociateRates(:,2)), cell2mat(rateStruct.leftDissociateRates(:,3)))
+    ylabel('Rate (s^{-1})')
+    title('Left Dissociation Rates')
+    saveas(gcf, 'plotRates/Brush_Left_Dissociation_Rates.png')
 
+    barPlotBrushRates(rateStruct.rightDissociateRates(:,1), cell2mat(rateStruct.rightDissociateRates(:,2)), cell2mat(rateStruct.rightDissociateRates(:,3)))
+    ylabel('Rate (s^{-1})')
+    title('Right Dissociation Rates')
+    saveas(gcf, 'plotRates/Brush_Right_Dissociation_Rates.png')
+
+    % Plot Binding Rate Fraction
+    names = rateStruct.leftBindRates(:,1);
+    rates = rateStruct.leftBindRates(:,2);
+    errors = rateStruct.leftBindRates(:,3);
+
+    % Convert names to categorical for bar plotting
+    catNames = categorical(names);
+
+    % Plot Primary Rates
+    figure;
+    cellRates = rates(2:end);
+    cellErrors = errors(2:end);
+    bar(catNames(2:end), rates);
+    hold on
+    errorbar(catNames(2:end), rates, errors, '.k', 'LineWidth', 2)
+    set(gca, 'FontWeight', 'bold', 'FontSize', 14, 'TickLabelInterpreter', 'tex');
+    ylabel('Fraction')
+    title('Left Binding Rates')
+    % saveas(gcf, 'plotRates/Brush_Left_Binding_Rates.png')
+
+    % barPlotBrushRates(rateStruct.rightBindRates(2:end,1), cell2mat(rateStruct.rightBindRates(2:end,2)), cell2mat(rateStruct.rightBindRates(2:end,3)))
+    % ylabel('Fraction')
+    % title('Right Binding Rates')
+    % saveas(gcf, 'plotRates/Brush_Right_Binding_Rates.png')
 end
 
+function barPlotBrushRates(names, rates, errors)
+    primaryNames = names;
+    primaryRates = rates;
+    primaryErrors = errors;
+
+    % Convert names to categorical for bar plotting
+    primaryCatNames = categorical(primaryNames);
+
+    % Plot Primary Rates
+    figure;
+    bar(primaryCatNames, primaryRates);
+    hold on
+    errorbar(primaryCatNames, primaryRates, primaryErrors, '.k', 'LineWidth', 2)
+    set(gca, 'FontWeight', 'bold', 'FontSize', 14, 'TickLabelInterpreter', 'tex');
+end
 
 %% Plotting Functions
 % Single exp plotting functions
@@ -548,7 +597,7 @@ function [params, error] = plotFitsCutoffOneMinus(fig, dwells, cutoffFraction, f
     % title(lgd, 'Brush Lengths')
     title(Title, 'Interpreter','none')
     xlabel('Time (s)')
-    ylabel('CCDF')
+    ylabel('1 - Cumulative Probability')
     set(gca, 'linewidth', 2, 'fontweight','bold', 'fontsize',16)
     % params;
 end
@@ -636,7 +685,7 @@ function [params, error] = plotDoubleFitsCutoff(fig, dwells, cutoffFraction, fit
     % title(lgd, 'Brush Lengths')
     title(Title, 'Interpreter','none')
     xlabel('Time (s)')
-    ylabel('CCDF')
+    ylabel('1 - Cumulative Probability')
     set(gca, 'linewidth', 2, 'fontweight','bold', 'fontsize',16)
     % params;
 end
