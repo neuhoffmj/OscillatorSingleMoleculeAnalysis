@@ -18,7 +18,7 @@ plotTotalTimeHistograms = 0;
 cutoffFraction = 0.95;
 doPlotHists = 0;
 appendFastFlops = 0;
-plotBrushesSamples = 1;
+plotBrushesSamples = 0;
 plotNonMarkov = 0;
 plotSimpleRates = 1;
 numBins = 20;
@@ -600,54 +600,38 @@ if brushBarPlots
     title('Left Binding Slow Rates')
     saveas(gcf, 'plotRates/Brush_Left_Binding_Slow_Rates.png')
 
-    %% Left Binding Rates
+    %% Right Binding Rates
+    % Fast Rates
     % Fast Rates
     figure;
-    bar(plotNames(1), rateStruct(1).leftBindRates, 'FaceColor', cmap(1, :));
+    bar(plotNames(1), rateStruct(1).rightBindRates, 'FaceColor', cmap(1, :));
     hold on
-    errorbar(plotNames(1), rateStruct(1).leftBindRates, rateStruct(1).leftBindErrors, '.k', 'LineWidth', 2)
+    errorbar(plotNames(1), rateStruct(1).rightBindRates, rateStruct(1).rightBindErrors, '.k', 'LineWidth', 2)
     for sample = 2:numSamples
-        bar(plotNames(sample), rateStruct(sample).leftBindRates(2), 'FaceColor', cmap(sample, :));
+        bar(plotNames(sample), rateStruct(sample).rightBindRates(2), 'FaceColor', cmap(sample, :));
         hold on
-        errorbar(plotNames(sample), rateStruct(sample).leftBindRates(2), rateStruct(sample).leftBindErrors(2), '.k', 'LineWidth', 2)
+        errorbar(plotNames(sample), rateStruct(sample).rightBindRates(2), rateStruct(sample).rightBindErrors(2), '.k', 'LineWidth', 2)
     end
     set(gca, 'FontWeight', 'bold', 'FontSize', 20, 'TickLabelInterpreter', 'tex', 'LineWidth', 5);
     ylabel('Rate (s^{-1})')
-    title('Left Binding Fast Rates')
-    saveas(gcf, 'plotRates/Brush_Left_Binding_Fast_Rates.png')
+    title('Right Binding Fast Rates')
+    saveas(gcf, 'plotRates/Brush_Right_Binding_Fast_Rates.png')
 
     % Slow Rates
     figure;
-    bar(plotNames(1), rateStruct(1).leftBindRates, 'FaceColor', cmap(1, :));
+    bar(plotNames(1), rateStruct(1).rightBindRates, 'FaceColor', cmap(1, :));
     hold on
-    errorbar(plotNames(1), rateStruct(1).leftBindRates, rateStruct(1).leftBindErrors, '.k', 'LineWidth', 2)
+    errorbar(plotNames(1), rateStruct(1).rightBindRates, rateStruct(1).rightBindErrors, '.k', 'LineWidth', 2)
     for sample = 2:numSamples
-        bar(plotNames(sample), rateStruct(sample).leftBindRates(3), 'FaceColor', cmap(sample, :));
+        bar(plotNames(sample), rateStruct(sample).rightBindRates(3), 'FaceColor', cmap(sample, :));
         hold on
-        errorbar(plotNames(sample), rateStruct(sample).leftBindRates(3), rateStruct(sample).leftBindErrors(3), '.k', 'LineWidth', 2)
+        errorbar(plotNames(sample), rateStruct(sample).rightBindRates(3), rateStruct(sample).rightBindErrors(3), '.k', 'LineWidth', 2)
     end
     set(gca, 'FontWeight', 'bold', 'FontSize', 20, 'TickLabelInterpreter', 'tex', 'LineWidth', 5);
     ylabel('Rate (s^{-1})')
-    title('Left Binding Slow Rates')
-    saveas(gcf, 'plotRates/Brush_Left_Binding_Slow_Rates.png')
+    title('Right Binding Slow Rates')
+    saveas(gcf, 'plotRates/Brush_Right_Binding_Slow_Rates.png')
     
-end
-
-
-function barPlotBrushRates(names, rates, errors)
-    primaryNames = names;
-    primaryRates = rates;
-    primaryErrors = errors;
-
-    % Convert names to categorical for bar plotting
-    primaryCatNames = categorical(primaryNames);
-
-    % Plot Primary Rates
-    figure;
-    bar(primaryCatNames, primaryRates);
-    hold on
-    errorbar(primaryCatNames, primaryRates, primaryErrors, '.k', 'LineWidth', 2)
-    set(gca, 'FontWeight', 'bold', 'FontSize', 20, 'TickLabelInterpreter', 'tex', 'LineWidth', 5);
 end
 
 %% Plotting Functions
