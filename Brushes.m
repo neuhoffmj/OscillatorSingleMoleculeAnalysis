@@ -162,25 +162,25 @@ if doPlotTraces
             midHMM = max(leftQuenchHMMSubset{trace}) / (max(rightQuenchHMMSubset{trace}) + max(leftQuenchHMMSubset{trace}));
 
             % Create figure
-            plFig = figure('Position', [10 10 1370 900]);
+            plFig = figure('Position', [10 10 1310 900]);
 
             % Axes positions (in pixels)
-            ax2 = axes('Units','pixels','Position',[160 77+2*275 1000 200]);   % Right channel (top)
-            ax5 = axes('Units','pixels','Position',[160+1010 77+2*275 180 200]);   % Right hist
-            ax3 = axes('Units','pixels','Position',[160 77+275 1000 200]);       % Left channel (middle)
-            ax6 = axes('Units','pixels','Position',[160+1010 77+275 180 200]);       % Left hist
-            ax1 = axes('Units','pixels','Position',[160 77 1000 200]); % FRET (bottom)
-            ax4 = axes('Units','pixels','Position',[160+1010 77 180 200]); % FRET hist
+            ax2 = axes('Units','pixels','Position',[180 85+2*265 1000 200]);   % Right channel (top)
+            ax5 = axes('Units','pixels','Position',[180+1010 85+2*265 80 200]);   % Right hist
+            ax3 = axes('Units','pixels','Position',[180 85+265 1000 200]);       % Left channel (middle)
+            ax6 = axes('Units','pixels','Position',[180+1010 85+265 80 200]);       % Left hist
+            ax1 = axes('Units','pixels','Position',[180 85 1000 200]); % FRET (bottom)
+            ax4 = axes('Units','pixels','Position',[180+1010 85 80 200]); % FRET hist
 
             % Right channel plot (top)
             axes(ax2);
             plot(seconds, rightQuenchHMMSubset{trace}', '-','LineWidth', 2,'Color',[0 0 0.2], 'DisplayName',"Right Quenching HMM")
             hold on
             plot(seconds, rightQuenchRawSubset{trace}', '-', 'Color',[0 0 0.6], 'DisplayName',"Right Quenching Raw")
-            xlabel('Time (s)', 'fontweight','bold','fontsize',14)
+            % xlabel('Time (s)', 'fontweight','bold','fontsize',14)
             ylabel('Right (Cy3)', 'fontweight','bold','fontsize',14)
-            set(gca, 'linewidth',4, 'fontweight','bold', 'fontsize',18)
-            legend
+            set(gca, 'linewidth',5, 'fontweight','bold', 'fontsize',20)
+            % legend
 
             % Right histogram
             axes(ax5);
@@ -193,10 +193,10 @@ if doPlotTraces
             plot(seconds, leftQuenchHMMSubset{trace}', '-','LineWidth', 2, 'Color',[0.4 0 0], 'DisplayName',"Left Quenching HMM")
             hold on
             plot(seconds, leftQuenchRawSubset{trace}', '-','Color', [0.8 0 0], 'DisplayName',"Left Quenching Raw")
-            xlabel('Time (s)', 'fontweight','bold','fontsize',14)
+            % xlabel('Time (s)', 'fontweight','bold','fontsize',14)
             ylabel('Left (Cy5)', 'fontweight','bold','fontsize',14)
-            set(gca, 'linewidth', 4, 'fontweight','bold', 'fontsize',18)
-            legend
+            set(gca, 'linewidth', 5, 'fontweight','bold', 'fontsize',20)
+            % legend
 
             % Left histogram
             axes(ax6);
@@ -214,7 +214,7 @@ if doPlotTraces
             yticks(tickvals)
             ylim([min(fretHMM)-.2 max(fretHMM)+.2])
             names = {'Left Bound'; 'Unbound'; 'Right Bound'};
-            set(gca,'ytick',tickvals,'yticklabel',names, 'linewidth', 4, 'fontweight','bold', 'fontsize',18)
+            set(gca,'ytick',tickvals,'yticklabel',names, 'linewidth', 5, 'fontweight','bold', 'fontsize',20)
             legend off
 
             % FRET histogram
