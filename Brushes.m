@@ -12,7 +12,7 @@ secPerFrame = dualSecPerFrame;
 doExcludeTraces = 1;
 includeFastFlops = 0;
 plotDwellScatter = 0;
-doSliderPlot = 1;
+doSliderPlot = 0;
 plotIndividualCumSum = 0;
 plotTotalTimeHistograms = 0;
 cutoffFraction = 0.95;
@@ -26,7 +26,7 @@ barPlots = 0;
 brushBarPlots = 0;
 printHypothesisTest = 0;
 
-doPlotTraces = 0; % Plot a Selection of Traces?
+doPlotTraces = 1; % Plot a Selection of Traces?
 plotTraces = {[41],...
     [1],[5],[12]};
 
@@ -151,43 +151,90 @@ if doPlotTraces
             rightQuenchHMMSubset = dualData{4, sample};
             rightQuenchRawSubset = dualData{5, sample};
             dualQuenchHMM = dualData{6, sample};
-            % Make Raw and HMM Plots
-            plFig = figure('Position', [10 10 1300 1000]);
-            subplot(3,1,1)
+            numBins = 30;
+
+            % Prepare time axis
             seconds = 0:secPerFrame:(size(leftQuenchHMMSubset{trace}, 1)-1)*secPerFrame;
-            plot(seconds, leftQuenchHMMSubset{trace}', '-','LineWidth', 2, 'Color',[0.4 0 0], DisplayName="Left Quenching HMM")
-            xlabel('Time (s)', 'fontweight','bold','fontsize',16)
-            ylabel('Cy5 Emission', 'fontweight','bold','fontsize',16)
-            set(gca, 'linewidth', 2, 'fontweight','bold', 'fontsize',16)
+
+            % Prepare FRET traces
+            fretRaw = leftQuenchRawSubset{trace} ./ (rightQuenchRawSubset{trace} + leftQuenchRawSubset{trace});
+            fretHMM = leftQuenchHMMSubset{trace} ./ (rightQuenchHMMSubset{trace} + leftQuenchHMMSubset{trace});
+            midHMM = max(leftQuenchHMMSubset{trace}) / (max(rightQuenchHMMSubset{trace}) + max(leftQuenchHMMSubset{trace}));
+
+            % Create figure
+            plFig = figure('Position', [10 10 1370 900]);
+
+            % Axes positions (in pixels)
+            ax2 = axes('Units','pixels','Position',[160 77+2*275 1000 200]);   % Right channel (top)
+            ax5 = axes('Units','pixels','Position',[160+1010 77+2*275 180 200]);   % Right hist
+            ax3 = axes('Units','pixels','Position',[160 77+275 1000 200]);       % Left channel (middle)
+            ax6 = axes('Units','pixels','Position',[160+1010 77+275 180 200]);       % Left hist
+            ax1 = axes('Units','pixels','Position',[160 77 1000 200]); % FRET (bottom)
+            ax4 = axes('Units','pixels','Position',[160+1010 77 180 200]); % FRET hist
+
+            % Right channel plot (top)
+            axes(ax2);
+            plot(seconds, rightQuenchHMMSubset{trace}', '-','LineWidth', 2,'Color',[0 0 0.2], 'DisplayName',"Right Quenching HMM")
             hold on
-            plot(seconds, leftQuenchRawSubset{trace}', '-','Color', [0.8 0 0], DisplayName="Left Quenching Raw")
-            title(sprintf("Trace %d", trace))
-            legend()
-            subplot(3,1,2)
-            plot(seconds, rightQuenchHMMSubset{trace}', '-','LineWidth', 2,'Color',[0 0 0.2], DisplayName="Right Quenching HMM")
-            xlabel('Time (s)', 'fontweight','bold','fontsize',16)
-            ylabel('Cy3 Emission', 'fontweight','bold','fontsize',16)
-            set(gca,'linewidth',2)
-            set(gca, 'fontweight','bold', 'fontsize',16)
+            plot(seconds, rightQuenchRawSubset{trace}', '-', 'Color',[0 0 0.6], 'DisplayName',"Right Quenching Raw")
+            xlabel('Time (s)', 'fontweight','bold','fontsize',14)
+            ylabel('Right (Cy3)', 'fontweight','bold','fontsize',14)
+            set(gca, 'linewidth',4, 'fontweight','bold', 'fontsize',18)
+            legend
+
+            % Right histogram
+            axes(ax5);
+            histogram(rightQuenchRawSubset{trace}, numBins, 'Normalization','probability', 'FaceColor',[0 0 0.6])
+            axis off
+            view([90 -90])
+
+            % Left channel plot (middle)
+            axes(ax3);
+            plot(seconds, leftQuenchHMMSubset{trace}', '-','LineWidth', 2, 'Color',[0.4 0 0], 'DisplayName',"Left Quenching HMM")
             hold on
-            plot(seconds, rightQuenchRawSubset{trace}', '-', 'Color',[0 0 0.6], DisplayName="Right Quenching Raw")
-            legend()
-            % Three State HMM PLot
-            % figure('Position', [10 10 1000 500])
-            subplot(3,1,3)
-            plot(seconds, dualQuenchHMM{trace}', '-','LineWidth', 2,'Color',[0 0 0.2], DisplayName="Dual Quenching HMM")
-            xlabel('Time (s)', 'fontweight','bold','fontsize',16)
-            yticks([0 1 2 3])
-            ylim([-.2 3.2])
-            set(gca,'linewidth',2)
-            set(gca, 'fontweight','bold', 'fontsize',16)
-            names = {'Both Bound'; 'Left Bound'; 'Unbound'; 'Right Bound'};
-            yticklabels(names)
-            grid on
-            saveas(plFig,strcat("./PlotTraces/",dualNames(sample), sprintf(" Trace %d.png", trace)))
+            plot(seconds, leftQuenchRawSubset{trace}', '-','Color', [0.8 0 0], 'DisplayName',"Left Quenching Raw")
+            xlabel('Time (s)', 'fontweight','bold','fontsize',14)
+            ylabel('Left (Cy5)', 'fontweight','bold','fontsize',14)
+            set(gca, 'linewidth', 4, 'fontweight','bold', 'fontsize',18)
+            legend
+
+            % Left histogram
+            axes(ax6);
+            histogram(leftQuenchRawSubset{trace}, numBins, 'Normalization','probability', 'FaceColor',[0.8 0 0])
+            axis off
+            view([90 -90])
+
+            % FRET plot (bottom)
+            axes(ax1);
+            plot(seconds, fretRaw, '-','LineWidth', 1,'Color',[0 0 0], 'DisplayName',"Dual Quenching Raw")
+            hold on
+            plot(seconds, fretHMM, '-','LineWidth', 2,'Color',[0.60 0 0.60], 'DisplayName',"Dual Quenching HMM")
+            xlabel('Time (s)', 'fontweight','bold','fontsize',14)
+            tickvals = [min(fretHMM) midHMM max(fretHMM)];
+            yticks(tickvals)
+            ylim([min(fretHMM)-.2 max(fretHMM)+.2])
+            names = {'Left Bound'; 'Unbound'; 'Right Bound'};
+            set(gca,'ytick',tickvals,'yticklabel',names, 'linewidth', 4, 'fontweight','bold', 'fontsize',18)
+            legend off
+
+            % FRET histogram
+            axes(ax4);
+            histogram(fretRaw, numBins, 'Normalization','probability', 'FaceColor',[0 0 0])
+            axis off
+            view([90 -90]);
+
+            % Add one title at the top for trace number
+            sgtitle(sprintf("Trace %d", trace), 'fontweight','bold','fontsize',25)
+
+            % Save figure
+            if ~exist('./PlotTraces', 'dir')
+            mkdir('./PlotTraces');
+            end
+            saveas(plFig, strcat("./PlotTraces/",dualData{1,sample}, sprintf(" Trace %d.png", trace)))
         end
     end
 end
+
 %% Calculating Dwell Times
 for i=1:size(dualData, 2)
     
