@@ -224,7 +224,7 @@ if doPlotTraces
             view([90 -90]);
 
             % Add one title at the top for trace number
-            sgtitle(sprintf("Trace %d", trace), 'fontweight','bold','fontsize',25)
+            sgtitle(strcat(dualNames{sample},sprintf(" Trace %d", trace)), 'fontweight','bold','fontsize',25)
 
             % Save figure
             if ~exist('./PlotTraces', 'dir')
