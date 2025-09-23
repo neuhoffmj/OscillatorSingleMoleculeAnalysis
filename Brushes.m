@@ -164,18 +164,18 @@ if doPlotTraces
             title(sprintf("Trace %d", trace))
             legend()
             subplot(3,1,2)
-            plot(seconds, rightQuenchHMMSubset{trace}', '-','LineWidth', 2,'Color',[0 0.2 0], DisplayName="Right Quenching HMM")
+            plot(seconds, rightQuenchHMMSubset{trace}', '-','LineWidth', 2,'Color',[0 0 0.2], DisplayName="Right Quenching HMM")
             xlabel('Time (s)', 'fontweight','bold','fontsize',16)
             ylabel('Cy3 Emission', 'fontweight','bold','fontsize',16)
             set(gca,'linewidth',2)
             set(gca, 'fontweight','bold', 'fontsize',16)
             hold on
-            plot(seconds, rightQuenchRawSubset{trace}', '-', 'Color',[0 0.6 0], DisplayName="Right Quenching Raw")
+            plot(seconds, rightQuenchRawSubset{trace}', '-', 'Color',[0 0 0.6], DisplayName="Right Quenching Raw")
             legend()
             % Three State HMM PLot
             % figure('Position', [10 10 1000 500])
             subplot(3,1,3)
-            plot(seconds, dualQuenchHMM{trace}', '-','LineWidth', 2,'Color',[0 0.2 0], DisplayName="Dual Quenching HMM")
+            plot(seconds, dualQuenchHMM{trace}', '-','LineWidth', 2,'Color',[0 0 0.2], DisplayName="Dual Quenching HMM")
             xlabel('Time (s)', 'fontweight','bold','fontsize',16)
             yticks([0 1 2 3])
             ylim([-.2 3.2])
@@ -854,13 +854,13 @@ function [] = slider_plot(leftRaw, leftHMM, rightRaw, rightHMM, dualHMM, secPerF
     plot(S.ax3, seconds, leftRaw{1}', '-','Color', [0.8 0 0], DisplayName="Left Quenching Raw")
     title(S.ax3,sprintf("Trace %d", 1))
 
-    plot(S.ax2, seconds, rightHMM{1}, '-','LineWidth', 2,'Color',[0 0.2 0], DisplayName="Right Quenching HMM")
+    plot(S.ax2, seconds, rightHMM{1}, '-','LineWidth', 2,'Color',[0 0 0.2], DisplayName="Right Quenching HMM")
     xlabel(S.ax2,'Time (s)')
     ylabel(S.ax2,'Cy3 Emission')
-    plot(S.ax2, seconds, rightRaw{1}', '-', 'Color',[0 0.6 0], DisplayName="Right Quenching Raw")
+    plot(S.ax2, seconds, rightRaw{1}', '-', 'Color',[0 0 0.6], DisplayName="Right Quenching Raw")
 
     % Three State HMM PLot
-    plot(S.ax1, seconds, dualHMM{1}', '-','LineWidth', 1,'Color',[0 0.2 0], DisplayName="Dual Quenching HMM")
+    plot(S.ax1, seconds, dualHMM{1}', '-','LineWidth', 1,'Color',[0 0 0.2], DisplayName="Dual Quenching HMM")
     xlabel(S.ax1,'Time (s)')
     yticks(S.ax1,[0 1 2 3])
     ylim(S.ax1, [-.2 3.2])
@@ -906,13 +906,13 @@ function [] = sl_call(varargin)
     plot(S.ax3, seconds, leftRaw{traceNum}', '-','Color', [0.8 0 0], DisplayName="Left Quenching Raw")
     title(S.ax3,sprintf("Trace %d", traceNum))
 
-    plot(S.ax2, seconds, rightHMM{traceNum}', '-','LineWidth', 2,'Color',[0 0.2 0], DisplayName="Right Quenching HMM")
+    plot(S.ax2, seconds, rightHMM{traceNum}', '-','LineWidth', 2,'Color',[0 0 0.2], DisplayName="Right Quenching HMM")
     xlabel(S.ax2,'Time (s)')
     ylabel(S.ax2,'Cy3 Emission')
-    plot(S.ax2, seconds, rightRaw{traceNum}', '-', 'Color',[0 0.6 0], DisplayName="Right Quenching Raw")
+    plot(S.ax2, seconds, rightRaw{traceNum}', '-', 'Color',[0 0 0.6], DisplayName="Right Quenching Raw")
 
     % Three State HMM PLot
-    plot(S.ax1, seconds, duaHMM{traceNum}', '-','LineWidth', 1,'Color',[0 0.2 0], DisplayName="Dual Quenching HMM")
+    plot(S.ax1, seconds, duaHMM{traceNum}', '-','LineWidth', 1,'Color',[0 0 0.2], DisplayName="Dual Quenching HMM")
     xlabel(S.ax1,'Time (s)')
     yticks(S.ax1,[0 1 2 3])
     ylim(S.ax1, [-.2 3.2])
@@ -964,12 +964,12 @@ function [] = fret_slider_plot(leftRaw, leftHMM, rightRaw, rightHMM, dualHMM, se
     axis(S.ax6, 'off')
     view(S.ax6, [90 -90])
 
-    plot(S.ax2, seconds, rightHMM{1}, '-','LineWidth', 2,'Color',[0 0.2 0], DisplayName="Right Quenching HMM")
+    plot(S.ax2, seconds, rightHMM{1}, '-','LineWidth', 2,'Color',[0 0 0.2], DisplayName="Right Quenching HMM")
     xlabel(S.ax2,'Time (s)')
     ylabel(S.ax2,'Cy3 Emission')
-    plot(S.ax2, seconds, rightRaw{1}', '-', 'Color',[0 0.6 0], DisplayName="Right Quenching Raw")
+    plot(S.ax2, seconds, rightRaw{1}', '-', 'Color',[0 0 0.6], DisplayName="Right Quenching Raw")
     
-    histogram(S.ax5, rightRaw{1}, 'Normalization','probability', 'FaceColor',[0 0.6 0])
+    histogram(S.ax5, rightRaw{1}, 'Normalization','probability', 'FaceColor',[0 0 0.6])
     axis(S.ax5, 'off')
     view(S.ax5, [90 -90])
 
@@ -979,9 +979,9 @@ function [] = fret_slider_plot(leftRaw, leftHMM, rightRaw, rightHMM, dualHMM, se
     midHMM = max(leftHMM{1}) / (max(rightHMM{1}) + max(leftHMM{1}));
 
     % Three State Composite Plot
-    plot(S.ax1, seconds, fretHMM, '-','LineWidth', 3,'Color',[1 0 0], DisplayName="Dual Quenching HMM")
-    hold on
     plot(S.ax1, seconds, fretRaw, '-','LineWidth', 1,'Color',[0 0 0], DisplayName="Dual Quenching Raw")
+    hold on
+    plot(S.ax1, seconds, fretHMM, '-','LineWidth', 2,'Color',[0.65 0 0.65], DisplayName="Dual Quenching HMM")
     xlabel(S.ax1,'Time (s)')
     tickvals = [min(fretHMM) midHMM max(fretHMM)];
     yticks(S.ax1,tickvals)
@@ -1037,12 +1037,12 @@ function [] = sl2_call(varargin)
     axis(S.ax6, 'off')
     view(S.ax6, [90 -90])
 
-    plot(S.ax2, seconds, rightHMM{traceNum}', '-','LineWidth', 2,'Color',[0 0.2 0], DisplayName="Right Quenching HMM")
+    plot(S.ax2, seconds, rightHMM{traceNum}', '-','LineWidth', 2,'Color',[0 0 0.2], DisplayName="Right Quenching HMM")
     xlabel(S.ax2,'Time (s)')
     ylabel(S.ax2,'Cy3 Emission')
-    plot(S.ax2, seconds, rightRaw{traceNum}', '-', 'Color',[0 0.6 0], DisplayName="Right Quenching Raw")
+    plot(S.ax2, seconds, rightRaw{traceNum}', '-', 'Color',[0 0 0.6], DisplayName="Right Quenching Raw")
 
-    histogram(S.ax5, rightRaw{traceNum}, 'Normalization','probability', 'FaceColor',[0 0.6 0])
+    histogram(S.ax5, rightRaw{traceNum}, 'Normalization','probability', 'FaceColor',[0 0 0.6])
     axis(S.ax5, 'off')
     view(S.ax5, [90 -90])
 
@@ -1051,9 +1051,9 @@ function [] = sl2_call(varargin)
     midHMM = max(leftHMM{traceNum}) / (max(rightHMM{traceNum}) + max(leftHMM{traceNum}));
 
     % Three State Composite Plot
-    plot(S.ax1, seconds, fretHMM, '-','LineWidth', 3,'Color',[1 0 0], DisplayName="Dual Quenching HMM")
-    hold on
     plot(S.ax1, seconds, fretRaw, '-','LineWidth', 1,'Color',[0 0 0], DisplayName="Dual Quenching Raw")
+    hold on
+    plot(S.ax1, seconds, fretHMM, '-','LineWidth', 2,'Color',[0.65 0 0.65], DisplayName="Dual Quenching HMM")
     xlabel(S.ax1,'Time (s)')
     tickvals = [min(fretHMM) midHMM max(fretHMM)];
     yticks(S.ax1,tickvals)
