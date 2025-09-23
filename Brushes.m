@@ -12,7 +12,7 @@ secPerFrame = dualSecPerFrame;
 doExcludeTraces = 1;
 includeFastFlops = 0;
 plotDwellScatter = 0;
-doSliderPlot = 0;
+doSliderPlot = 1;
 plotIndividualCumSum = 0;
 plotTotalTimeHistograms = 0;
 cutoffFraction = 0.95;
@@ -20,10 +20,10 @@ doPlotHists = 0;
 appendFastFlops = 0;
 plotBrushesSamples = 0;
 plotNonMarkov = 0;
-plotSimpleRates = 1;
+plotSimpleRates = 0;
 numBins = 20;
 barPlots = 0;
-brushBarPlots = 1;
+brushBarPlots = 0;
 printHypothesisTest = 0;
 
 doPlotTraces = 0; % Plot a Selection of Traces?
@@ -138,7 +138,8 @@ end
 %% Plotting Traces
 if doSliderPlot
     for i=1:size(dualData, 2)
-        slider_plot(dualData{3, i}, dualData{2, i}, dualData{5, i}, dualData{4, i}, dualData{6, i}, dualSecPerFrame, dualData{1,i})
+        % slider_plot(dualData{3, i}, dualData{2, i}, dualData{5, i}, dualData{4, i}, dualData{6, i}, dualSecPerFrame, dualData{1,i})
+        fret_slider_plot(dualData{3, i}, dualData{2, i}, dualData{5, i}, dualData{4, i}, dualData{6, i}, dualSecPerFrame, dualData{1,i})
     end
 end
 
@@ -925,44 +926,114 @@ function [] = sl_call(varargin)
     end
 end
 
-function [] = sl2_call(varargin)
-    % Callback for the slider.
-    [h,S] = varargin{[1,3]};  % calling handle and data structure.
-    raw = varargin{4};
-    HMM = varargin{5};
-    secPerFrame = varargin{6};
-    HMMclr = varargin{7};
-    rawclr = varargin{8};
-    side = varargin{9};
-    fluor = varargin{10};
-    % cla
-    traceNum = round(get(h,'value'));
+function [] = fret_slider_plot(leftRaw, leftHMM, rightRaw, rightHMM, dualHMM, secPerFrame, titlestr)
+    % Plot different plots according to slider location.
+    % Normalizes and computes a composite trace from the Cy3 and Cy5 traces
+    S.fh = figure('units','pixels',...
+        'position',[50 50 1360 870],...
+        'menubar','none',...
+        'name','slider_plot',...
+        'numbertitle','off',...
+        'resize','off');
+    set(S.fh, 'Name', titlestr);
+    S.ax1 = axes('unit','pix','position',[120 80 1200 200]);
+    S.ax2 = axes('unit','pix','position',[120 80+280 1200 200]);
+    S.ax3 = axes('unit','pix','position',[120 80+2*280 1200 200]);
 
     for a =[S.ax1 S.ax2 S.ax3]
         cla(a)
         hold(a, 'on')
     end
 
-    seconds = 0:secPerFrame:(size(raw{traceNum}, 1)-1)*secPerFrame;
-    plot(S.ax3, seconds, raw{traceNum}', '-','LineWidth', 2, 'Color',rawclr, DisplayName=strcat(side, " Quenching raw"))
+    seconds = 0:secPerFrame:(size(leftHMM{1}, 1)-1)*secPerFrame;
+    plot(S.ax3, seconds, leftHMM{1}', '-','LineWidth', 2, 'Color',[0.4 0 0], DisplayName="Left Quenching HMM")
     xlabel(S.ax3,'Time (s)')
-    ylabel(S.ax3,strcat(fluor, ' Emission'))
-    title(S.ax3,sprintf("Trace %d", traceNum))
+    ylabel(S.ax3,'Cy5 Emission')
+    plot(S.ax3, seconds, leftRaw{1}', '-','Color', [0.8 0 0], DisplayName="Left Quenching Raw")
+    title(S.ax3,sprintf("Trace %d", 1))
 
-    plot(S.ax2, seconds, HMM{traceNum}, '-','LineWidth', 2,'Color',HMMclr, DisplayName=strcat(side, " Quenching HMM"))
+    plot(S.ax2, seconds, rightHMM{1}, '-','LineWidth', 2,'Color',[0 0.2 0], DisplayName="Right Quenching HMM")
     xlabel(S.ax2,'Time (s)')
-    ylabel(S.ax2,strcat(fluor, ' Emission'))
+    ylabel(S.ax2,'Cy3 Emission')
+    plot(S.ax2, seconds, rightRaw{1}', '-', 'Color',[0 0.6 0], DisplayName="Right Quenching Raw")
 
-    % Three State HMM PLot
-    plot(S.ax1, seconds, raw{traceNum}', '-','LineWidth', 2, 'Color',rawclr, DisplayName=strcat(side, " Quenching raw"))
-    xlabel(S.ax1,'Time (s)')
-    ylabel(S.ax1,strcat(fluor, ' Emission'))
 
-    plot(S.ax1, seconds, HMM{traceNum}, '-','LineWidth', 2,'Color',HMMclr, DisplayName=strcat(side, " Quenching HMM"))
+    fretRaw = leftRaw{1} ./ (rightRaw{1} + leftRaw{1});
+    fretHMM = leftHMM{1} ./ (rightHMM{1} + leftHMM{1});
+    midHMM = max(leftHMM{1}) / (max(rightHMM{1}) + max(leftHMM{1}));
+
+    % Three State Composite Plot
+    plot(S.ax1, seconds, fretHMM, '-','LineWidth', 3,'Color',[1 0 0], DisplayName="Dual Quenching HMM")
+    hold on
+    plot(S.ax1, seconds, fretRaw, '-','LineWidth', 1,'Color',[0 0 0], DisplayName="Dual Quenching Raw")
     xlabel(S.ax1,'Time (s)')
-    ylabel(S.ax1,strcat(fluor, ' Emission'))
+    tickvals = [min(fretHMM) midHMM max(fretHMM)];
+    yticks(S.ax1,tickvals)
+    ylim(S.ax1, [min(fretHMM)-.2 max(fretHMM)+.2])
+    names = {'Left Bound'; 'Unbound'; 'Right Bound'};
+    set(S.ax1,'ytick',tickvals,'yticklabel',names)
+    grid(S.ax1)
+    legend(S.ax1, 'off')
+
+    for a =[S.ax2 S.ax3]
+        legend(a)
+    end
+    saveas(S.fh, "trace.png")
+
+    S.sl = uicontrol('style','slide',...
+    'unit','pix',...
+    'position',[0 10 1200 30],...
+    'min',1,'max',size(dualHMM,2),'val',1,...
+    'sliderstep',[1/size(dualHMM,2) 1/size(dualHMM,2)],...
+    'callback',{@sl2_call,S, leftRaw, leftHMM, rightRaw, rightHMM, dualHMM, secPerFrame});
+end
+
+function [] = sl2_call(varargin)
+    % Callback for the slider.
+    [h,S] = varargin{[1,3]};  % calling handle and data structure.
+    leftRaw = varargin{4};
+    leftHMM = varargin{5};
+    rightRaw = varargin{6};
+    rightHMM = varargin{7};
+    duaHMM = varargin{8};
+    secPerFrame = varargin{9};
+    % cla
+    traceNum = round(get(h,'value'));
+    seconds = 0:secPerFrame:(size(leftHMM{traceNum}, 1)-1)*secPerFrame;
 
     for a =[S.ax1 S.ax2 S.ax3]
+        cla(a)
+        hold(a, 'on')
+    end
+
+    plot(S.ax3, seconds, leftHMM{traceNum}', '-','LineWidth', 2, 'Color',[0.4 0 0], DisplayName="Left Quenching HMM")
+    xlabel(S.ax3,'Time (s)')
+    ylabel(S.ax3,'Cy5 Emission')
+    plot(S.ax3, seconds, leftRaw{traceNum}', '-','Color', [0.8 0 0], DisplayName="Left Quenching Raw")
+    title(S.ax3,sprintf("Trace %d", traceNum))
+
+    plot(S.ax2, seconds, rightHMM{traceNum}', '-','LineWidth', 2,'Color',[0 0.2 0], DisplayName="Right Quenching HMM")
+    xlabel(S.ax2,'Time (s)')
+    ylabel(S.ax2,'Cy3 Emission')
+    plot(S.ax2, seconds, rightRaw{traceNum}', '-', 'Color',[0 0.6 0], DisplayName="Right Quenching Raw")
+
+    fretRaw = leftRaw{traceNum} ./ (rightRaw{traceNum} + leftRaw{traceNum});
+    fretHMM = leftHMM{traceNum} ./ (rightHMM{traceNum} + leftHMM{traceNum});
+    midHMM = max(leftHMM{traceNum}) / (max(rightHMM{traceNum}) + max(leftHMM{traceNum}));
+
+    % Three State Composite Plot
+    plot(S.ax1, seconds, fretHMM, '-','LineWidth', 3,'Color',[1 0 0], DisplayName="Dual Quenching HMM")
+    hold on
+    plot(S.ax1, seconds, fretRaw, '-','LineWidth', 1,'Color',[0 0 0], DisplayName="Dual Quenching Raw")
+    xlabel(S.ax1,'Time (s)')
+    tickvals = [min(fretHMM) midHMM max(fretHMM)];
+    yticks(S.ax1,tickvals)
+    ylim(S.ax1, [min(fretHMM)-.2 max(fretHMM)+.2])
+    names = {'Left Bound'; 'Unbound'; 'Right Bound'};
+    set(S.ax1,'ytick',tickvals,'yticklabel',names)
+    grid(S.ax1)
+    legend(S.ax1, 'off')
+    for a =[S.ax2 S.ax3]
         legend(a)
     end
 end
