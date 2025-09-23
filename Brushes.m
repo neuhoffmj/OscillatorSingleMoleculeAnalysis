@@ -930,15 +930,23 @@ function [] = fret_slider_plot(leftRaw, leftHMM, rightRaw, rightHMM, dualHMM, se
     % Plot different plots according to slider location.
     % Normalizes and computes a composite trace from the Cy3 and Cy5 traces
     S.fh = figure('units','pixels',...
-        'position',[50 50 1360 870],...
+        'position',[50 50 1340 870],...
         'menubar','none',...
         'name','slider_plot',...
         'numbertitle','off',...
         'resize','off');
     set(S.fh, 'Name', titlestr);
-    S.ax1 = axes('unit','pix','position',[120 80 1200 200]);
-    S.ax2 = axes('unit','pix','position',[120 80+280 1200 200]);
-    S.ax3 = axes('unit','pix','position',[120 80+2*280 1200 200]);
+
+    % S.ax1 = subplot(1,8,[1:7]);
+    % S.ax2 = subplot(1,8,[1:7]);
+    % S.ax3 = subplot(1,8,[1:7]);
+    S.ax1 = axes('unit','pix','position',[120 80 1000 200]);
+    S.ax2 = axes('unit','pix','position',[120 80+280 1000 200]);
+    S.ax3 = axes('unit','pix','position',[120 80+2*280 1000 200]);
+
+    S.ax4 = axes('unit','pix','position',[120+1010 80 180 200]);
+    S.ax5 = axes('unit','pix','position',[120+1010 80+280 180 200]);
+    S.ax6 = axes('unit','pix','position',[120+1010 80+2*280 180 200]);
 
     for a =[S.ax1 S.ax2 S.ax3]
         cla(a)
@@ -952,10 +960,18 @@ function [] = fret_slider_plot(leftRaw, leftHMM, rightRaw, rightHMM, dualHMM, se
     plot(S.ax3, seconds, leftRaw{1}', '-','Color', [0.8 0 0], DisplayName="Left Quenching Raw")
     title(S.ax3,sprintf("Trace %d", 1))
 
+    histogram(S.ax6, leftRaw{1}, 'Normalization','probability', 'FaceColor',[0.8 0 0])
+    axis(S.ax6, 'off')
+    view(S.ax6, [90 -90])
+
     plot(S.ax2, seconds, rightHMM{1}, '-','LineWidth', 2,'Color',[0 0.2 0], DisplayName="Right Quenching HMM")
     xlabel(S.ax2,'Time (s)')
     ylabel(S.ax2,'Cy3 Emission')
     plot(S.ax2, seconds, rightRaw{1}', '-', 'Color',[0 0.6 0], DisplayName="Right Quenching Raw")
+    
+    histogram(S.ax5, rightRaw{1}, 'Normalization','probability', 'FaceColor',[0 0.6 0])
+    axis(S.ax5, 'off')
+    view(S.ax5, [90 -90])
 
 
     fretRaw = leftRaw{1} ./ (rightRaw{1} + leftRaw{1});
@@ -974,6 +990,11 @@ function [] = fret_slider_plot(leftRaw, leftHMM, rightRaw, rightHMM, dualHMM, se
     set(S.ax1,'ytick',tickvals,'yticklabel',names)
     grid(S.ax1)
     legend(S.ax1, 'off')
+
+    histogram(S.ax4, fretRaw, 'Normalization','probability', 'FaceColor',[0 0 0])
+    axis(S.ax4, 'off')
+    view(S.ax4, [90 -90]);
+
 
     for a =[S.ax2 S.ax3]
         legend(a)
@@ -1001,7 +1022,7 @@ function [] = sl2_call(varargin)
     traceNum = round(get(h,'value'));
     seconds = 0:secPerFrame:(size(leftHMM{traceNum}, 1)-1)*secPerFrame;
 
-    for a =[S.ax1 S.ax2 S.ax3]
+    for a =[S.ax1 S.ax2 S.ax3 S.ax4 S.ax5 S.ax6]
         cla(a)
         hold(a, 'on')
     end
@@ -1012,10 +1033,18 @@ function [] = sl2_call(varargin)
     plot(S.ax3, seconds, leftRaw{traceNum}', '-','Color', [0.8 0 0], DisplayName="Left Quenching Raw")
     title(S.ax3,sprintf("Trace %d", traceNum))
 
+    histogram(S.ax6, leftRaw{traceNum}, 'Normalization','probability', 'FaceColor',[0.8 0 0])
+    axis(S.ax6, 'off')
+    view(S.ax6, [90 -90])
+
     plot(S.ax2, seconds, rightHMM{traceNum}', '-','LineWidth', 2,'Color',[0 0.2 0], DisplayName="Right Quenching HMM")
     xlabel(S.ax2,'Time (s)')
     ylabel(S.ax2,'Cy3 Emission')
     plot(S.ax2, seconds, rightRaw{traceNum}', '-', 'Color',[0 0.6 0], DisplayName="Right Quenching Raw")
+
+    histogram(S.ax5, rightRaw{traceNum}, 'Normalization','probability', 'FaceColor',[0 0.6 0])
+    axis(S.ax5, 'off')
+    view(S.ax5, [90 -90])
 
     fretRaw = leftRaw{traceNum} ./ (rightRaw{traceNum} + leftRaw{traceNum});
     fretHMM = leftHMM{traceNum} ./ (rightHMM{traceNum} + leftHMM{traceNum});
@@ -1033,6 +1062,11 @@ function [] = sl2_call(varargin)
     set(S.ax1,'ytick',tickvals,'yticklabel',names)
     grid(S.ax1)
     legend(S.ax1, 'off')
+
+    histogram(S.ax4, fretRaw, 'Normalization','probability', 'FaceColor',[0 0 0])
+    axis(S.ax4, 'off')
+    view(S.ax4, [90 -90])
+
     for a =[S.ax2 S.ax3]
         legend(a)
     end
