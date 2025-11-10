@@ -10,21 +10,21 @@ dualSecPerFrame = 1/dualframeRate;
 secPerFrame = dualSecPerFrame;
 
 doExcludeTraces = 1;
-includeFastFlops = 0;
+includeFastFlops = 1;
 plotDwellScatter = 0;
 doSliderPlot = 0;
 plotIndividualCumSum = 0;
 plotTotalTimeHistograms = 0;
 cutoffFraction = 0.95;
 doPlotHists = 0;
-appendFastFlops = 0;
-plotBrushesSamples = 0;
+appendFastFlops = 1;
+plotBrushesSamples = 1;
 plotNonMarkov = 0;
-plotSimpleRates = 0;
+plotSimpleRates = 1;
 numBins = 20;
-barPlots = 0;
-brushBarPlots = 0;
-printHypothesisTest = 0;
+barPlots = 1;
+brushBarPlots = 1;
+printHypothesisTest = 1;
 
 doPlotTraces = 1; % Plot a Selection of Traces?
 plotTraces = {[41],...
@@ -66,10 +66,10 @@ olddualExcludeTraces = {[11, 14, 15, 18, 26, 37], ...
 % dualExcludeTraces = olddualExcludeTraces;
 
 excludeAllButFastFlops  = {[50, 73, 178, 7, 56, 86, 89, 92, 93, 94, 109, 135, 184, 97, ...
-    49, 53, 74, 177, 181], ...
+    49, 53, 74, 177, 181, 67, 120, 122, 127], ...
     [20, 29, 39, 50, 56, 57, 10, 35, 40, 41, 49, 16, 26], ...
-    [8, 12, 65, 17, 68, 9, 10],...
-    [8, 16, 22, 31, 48, 57, 77, 85, 94, 106, 97]};
+    [8, 12, 65, 17, 68, 9, 10, 28],...
+    [8, 16, 22, 31, 48, 57, 77, 85, 94, 106, 97, 95, 101]};
 
 if includeFastFlops
     dualExcludeTraces = excludeAllButFastFlops;
@@ -600,7 +600,7 @@ if brushBarPlots
         errorbar(plotNames(sample), rateStruct(sample).leftBindRates(1), rateStruct(sample).leftBindErrors(1), '.k', 'LineWidth', 2)
     end
     set(gca, 'FontWeight', 'bold', 'FontSize', 20, 'TickLabelInterpreter', 'tex', 'LineWidth', 5);
-    ylabel('Fraction')
+    ylabel('Fraction Fast')
     title('Left Binding Fractions')
     ylim([0 1])
     saveas(gcf, 'plotRates/Brush_Left_Binding_Fractions.png')
@@ -612,7 +612,7 @@ if brushBarPlots
         errorbar(plotNames(sample), rateStruct(sample).rightBindRates(1), rateStruct(sample).rightBindErrors(1), '.k', 'LineWidth', 2)
     end
     set(gca, 'FontWeight', 'bold', 'FontSize', 20, 'TickLabelInterpreter', 'tex', 'LineWidth', 5);
-    ylabel('Fraction')
+    ylabel('Fraction Fast')
     ylim([0 1])
     title('Right Binding Fractions')
     saveas(gcf, 'plotRates/Brush_Right_Binding_Fractions.png')
@@ -628,7 +628,7 @@ if brushBarPlots
         hold on
         errorbar(plotNames(sample), rateStruct(sample).leftBindRates(2), rateStruct(sample).leftBindErrors(2), '.k', 'LineWidth', 2)
     end
-    set(gca, 'FontWeight', 'bold', 'FontSize', 20, 'TickLabelInterpreter', 'tex', 'LineWidth', 5);
+    set(gca, 'FontWeight', 'bold', 'FontSize', 20, 'TickLabelInterpreter', 'tex', 'LineWidth', 3.3);
     ylabel('Rate (s^{-1})')
     title('Left Binding Fast Rates')
     saveas(gcf, 'plotRates/Brush_Left_Binding_Fast_Rates.png')
@@ -643,7 +643,7 @@ if brushBarPlots
         hold on
         errorbar(plotNames(sample), rateStruct(sample).leftBindRates(3), rateStruct(sample).leftBindErrors(3), '.k', 'LineWidth', 2)
     end
-    set(gca, 'FontWeight', 'bold', 'FontSize', 20, 'TickLabelInterpreter', 'tex', 'LineWidth', 5);
+    set(gca, 'FontWeight', 'bold', 'FontSize', 20, 'TickLabelInterpreter', 'tex', 'LineWidth', 3.3);
     ylabel('Rate (s^{-1})')
     title('Left Binding Slow Rates')
     saveas(gcf, 'plotRates/Brush_Left_Binding_Slow_Rates.png')
@@ -660,7 +660,7 @@ if brushBarPlots
         hold on
         errorbar(plotNames(sample), rateStruct(sample).rightBindRates(2), rateStruct(sample).rightBindErrors(2), '.k', 'LineWidth', 2)
     end
-    set(gca, 'FontWeight', 'bold', 'FontSize', 20, 'TickLabelInterpreter', 'tex', 'LineWidth', 5);
+    set(gca, 'FontWeight', 'bold', 'FontSize', 20, 'TickLabelInterpreter', 'tex', 'LineWidth', 3.3);
     ylabel('Rate (s^{-1})')
     title('Right Binding Fast Rates')
     saveas(gcf, 'plotRates/Brush_Right_Binding_Fast_Rates.png')
@@ -675,7 +675,7 @@ if brushBarPlots
         hold on
         errorbar(plotNames(sample), rateStruct(sample).rightBindRates(3), rateStruct(sample).rightBindErrors(3), '.k', 'LineWidth', 2)
     end
-    set(gca, 'FontWeight', 'bold', 'FontSize', 20, 'TickLabelInterpreter', 'tex', 'LineWidth', 5);
+    set(gca, 'FontWeight', 'bold', 'FontSize', 20, 'TickLabelInterpreter', 'tex', 'LineWidth', 3.3);
     ylabel('Rate (s^{-1})')
     title('Right Binding Slow Rates')
     saveas(gcf, 'plotRates/Brush_Right_Binding_Slow_Rates.png')
@@ -790,7 +790,7 @@ function fittedRates = plotNmixed(dwells, cutoffFraction, params, names, colors,
     t.FontWeight = 'bold';
     xlim([0 30])
     ylim([9e-3 1])
-    set(gca, 'LineWidth', 8, 'FontSize', 28, 'FontWeight', 'bold')
+    set(gca, 'LineWidth', 3.3, 'FontSize', 28, 'FontWeight', 'bold')
     set(gca,'OuterPosition', [0 0.22 0.88 0.78])
     % saveas(Fig, strcat(title, ".png"))
 end
