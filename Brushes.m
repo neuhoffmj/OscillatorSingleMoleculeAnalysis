@@ -18,15 +18,15 @@ plotTotalTimeHistograms = 0;
 cutoffFraction = 0.95;
 doPlotHists = 0;
 appendFastFlops = 1;
-plotBrushesSamples = 1;
+plotBrushesSamples = 0;
 plotNonMarkov = 0;
-plotSimpleRates = 1;
+plotSimpleRates = 0;
 numBins = 20;
-barPlots = 1;
+barPlots = 0;
 brushBarPlots = 1;
 printHypothesisTest = 1;
 
-doPlotTraces = 1; % Plot a Selection of Traces?
+doPlotTraces = 0; % Plot a Selection of Traces?
 plotTraces = {[41],...
     [1],[5],[12]};
 
@@ -575,7 +575,7 @@ if brushBarPlots
         hold on
         errorbar(plotNames(sample), rateStruct(sample).leftDissociateRates, rateStruct(sample).leftDissociateErrors, '.k', 'LineWidth', 2)
     end
-    set(gca, 'FontWeight', 'bold', 'FontSize', 20, 'TickLabelInterpreter', 'tex', 'LineWidth', 5);
+    set(gca, 'FontWeight', 'bold', 'FontSize', 20, 'TickLabelInterpreter', 'tex', 'LineWidth', 3.3);
     ylabel('Rate (s^{-1})')
     title('Left Dissociation Rates')
     saveas(gcf, 'plotRates/Brush_Left_Dissociation_Rates.png')
@@ -587,7 +587,7 @@ if brushBarPlots
         hold on
         errorbar(plotNames(sample), rateStruct(sample).rightDissociateRates, rateStruct(sample).rightDissociateErrors, '.k', 'LineWidth', 2)
     end
-    set(gca, 'FontWeight', 'bold', 'FontSize', 20, 'TickLabelInterpreter', 'tex', 'LineWidth', 5);
+    set(gca, 'FontWeight', 'bold', 'FontSize', 20, 'TickLabelInterpreter', 'tex', 'LineWidth', 3.3);
     ylabel('Rate (s^{-1})')
     title('Right Dissociation Rates')
     saveas(gcf, 'plotRates/Brush_Right_Dissociation_Rates.png')
@@ -599,7 +599,7 @@ if brushBarPlots
         hold on
         errorbar(plotNames(sample), rateStruct(sample).leftBindRates(1), rateStruct(sample).leftBindErrors(1), '.k', 'LineWidth', 2)
     end
-    set(gca, 'FontWeight', 'bold', 'FontSize', 20, 'TickLabelInterpreter', 'tex', 'LineWidth', 5);
+    set(gca, 'FontWeight', 'bold', 'FontSize', 20, 'TickLabelInterpreter', 'tex', 'LineWidth', 3.3);
     ylabel('Fraction Fast')
     title('Left Binding Fractions')
     ylim([0 1])
@@ -611,7 +611,7 @@ if brushBarPlots
         hold on
         errorbar(plotNames(sample), rateStruct(sample).rightBindRates(1), rateStruct(sample).rightBindErrors(1), '.k', 'LineWidth', 2)
     end
-    set(gca, 'FontWeight', 'bold', 'FontSize', 20, 'TickLabelInterpreter', 'tex', 'LineWidth', 5);
+    set(gca, 'FontWeight', 'bold', 'FontSize', 20, 'TickLabelInterpreter', 'tex', 'LineWidth', 3.3);
     ylabel('Fraction Fast')
     ylim([0 1])
     title('Right Binding Fractions')
@@ -619,66 +619,76 @@ if brushBarPlots
 
     %% Left Binding Rates
     % Fast Rates
-    figure;
-    bar(plotNames(1), rateStruct(1).leftBindRates, 'FaceColor', cmap(1, :));
-    hold on
-    errorbar(plotNames(1), rateStruct(1).leftBindRates, rateStruct(1).leftBindErrors, '.k', 'LineWidth', 2)
-    for sample = 2:numSamples
-        bar(plotNames(sample), rateStruct(sample).leftBindRates(2), 'FaceColor', cmap(sample, :));
-        hold on
-        errorbar(plotNames(sample), rateStruct(sample).leftBindRates(2), rateStruct(sample).leftBindErrors(2), '.k', 'LineWidth', 2)
-    end
-    set(gca, 'FontWeight', 'bold', 'FontSize', 20, 'TickLabelInterpreter', 'tex', 'LineWidth', 3.3);
-    ylabel('Rate (s^{-1})')
-    title('Left Binding Fast Rates')
-    saveas(gcf, 'plotRates/Brush_Left_Binding_Fast_Rates.png')
+    % figure;
+    % fastSlow  = {'NA','Fast', 'Slow','Fast', 'Slow','Fast', 'Slow'};
+    % fastSlow = categorical(fastSlow);
+    % bars = {};
+    % bars{1} = bar(plotNames(1), rateStruct(1).leftBindRates, 'FaceColor', cmap(1, :));
+    % hold on
+    % for sample = 2:numSamples
+    %     fastSlowNumber = 2*(sample-1);
+    %     bars{sample} = bar(plotNames(sample), [rateStruct(sample).leftBindRates(2), rateStruct(sample).leftBindRates(3)], 'FaceColor', cmap(sample, :));
+    %     hold on
+    % end
+    % errorbar(bars{1}.XEndPoints, rateStruct(1).leftBindRates, rateStruct(1).leftBindErrors, '.k', 'LineWidth', 2)
+    % for i = 2:numSamples
+    %     errorbar(bars{i}(1).XEndPoints, rateStruct(i).leftBindRates(2), rateStruct(i).leftBindErrors(2), '.k', 'LineWidth', 2)
+    %     errorbar(bars{i}(2).XEndPoints, rateStruct(i).leftBindRates(3), rateStruct(i).leftBindErrors(3), '.k', 'LineWidth', 2)
+    % end
+    % set(gca, 'FontWeight', 'bold', 'FontSize', 20, 'TickLabelInterpreter', 'tex', 'LineWidth', 3.3);
+    % ylabel('Rate (s^{-1})')
+    % title('Left Binding Fast Rates')
+    % saveas(gcf, 'plotRates/Brush_Left_Binding_Fast_Rates.png')
+    plotRateBar(cmap, plotNames, rateStruct, 'leftBind', 'Left Binding Rates', 'Brush_Left_Binding_Rates')
+    plotRateBar(cmap, plotNames, rateStruct, 'rightBind', 'Right Binding Rates', 'Brush_Right_Binding_Rates')
 
-    % Slow Rates
-    figure;
-    bar(plotNames(1), rateStruct(1).leftBindRates, 'FaceColor', cmap(1, :));
-    hold on
-    errorbar(plotNames(1), rateStruct(1).leftBindRates, rateStruct(1).leftBindErrors, '.k', 'LineWidth', 2)
-    for sample = 2:numSamples
-        bar(plotNames(sample), rateStruct(sample).leftBindRates(3), 'FaceColor', cmap(sample, :));
-        hold on
-        errorbar(plotNames(sample), rateStruct(sample).leftBindRates(3), rateStruct(sample).leftBindErrors(3), '.k', 'LineWidth', 2)
-    end
-    set(gca, 'FontWeight', 'bold', 'FontSize', 20, 'TickLabelInterpreter', 'tex', 'LineWidth', 3.3);
-    ylabel('Rate (s^{-1})')
-    title('Left Binding Slow Rates')
-    saveas(gcf, 'plotRates/Brush_Left_Binding_Slow_Rates.png')
 
-    %% Right Binding Rates
-    % Fast Rates
-    % Fast Rates
-    figure;
-    bar(plotNames(1), rateStruct(1).rightBindRates, 'FaceColor', cmap(1, :));
-    hold on
-    errorbar(plotNames(1), rateStruct(1).rightBindRates, rateStruct(1).rightBindErrors, '.k', 'LineWidth', 2)
-    for sample = 2:numSamples
-        bar(plotNames(sample), rateStruct(sample).rightBindRates(2), 'FaceColor', cmap(sample, :));
-        hold on
-        errorbar(plotNames(sample), rateStruct(sample).rightBindRates(2), rateStruct(sample).rightBindErrors(2), '.k', 'LineWidth', 2)
-    end
-    set(gca, 'FontWeight', 'bold', 'FontSize', 20, 'TickLabelInterpreter', 'tex', 'LineWidth', 3.3);
-    ylabel('Rate (s^{-1})')
-    title('Right Binding Fast Rates')
-    saveas(gcf, 'plotRates/Brush_Right_Binding_Fast_Rates.png')
+    % % Slow Rates
+    % figure;
+    % bar(plotNames(1), rateStruct(1).leftBindRates, 'FaceColor', cmap(1, :));
+    % hold on
+    % errorbar(plotNames(1), rateStruct(1).leftBindRates, rateStruct(1).leftBindErrors, '.k', 'LineWidth', 2)
+    % for sample = 2:numSamples
+    %     bar(plotNames(sample), rateStruct(sample).leftBindRates(3), 'FaceColor', cmap(sample, :));
+    %     hold on
+    %     errorbar(plotNames(sample), rateStruct(sample).leftBindRates(3), rateStruct(sample).leftBindErrors(3), '.k', 'LineWidth', 2)
+    % end
+    % set(gca, 'FontWeight', 'bold', 'FontSize', 20, 'TickLabelInterpreter', 'tex', 'LineWidth', 3.3);
+    % ylabel('Rate (s^{-1})')
+    % title('Left Binding Slow Rates')
+    % saveas(gcf, 'plotRates/Brush_Left_Binding_Slow_Rates.png')
 
-    % Slow Rates
-    figure;
-    bar(plotNames(1), rateStruct(1).rightBindRates, 'FaceColor', cmap(1, :));
-    hold on
-    errorbar(plotNames(1), rateStruct(1).rightBindRates, rateStruct(1).rightBindErrors, '.k', 'LineWidth', 2)
-    for sample = 2:numSamples
-        bar(plotNames(sample), rateStruct(sample).rightBindRates(3), 'FaceColor', cmap(sample, :));
-        hold on
-        errorbar(plotNames(sample), rateStruct(sample).rightBindRates(3), rateStruct(sample).rightBindErrors(3), '.k', 'LineWidth', 2)
-    end
-    set(gca, 'FontWeight', 'bold', 'FontSize', 20, 'TickLabelInterpreter', 'tex', 'LineWidth', 3.3);
-    ylabel('Rate (s^{-1})')
-    title('Right Binding Slow Rates')
-    saveas(gcf, 'plotRates/Brush_Right_Binding_Slow_Rates.png')
+    % %% Right Binding Rates
+    % % Fast Rates
+    % % Fast Rates
+    % figure;
+    % bar(plotNames(1), rateStruct(1).rightBindRates, 'FaceColor', cmap(1, :));
+    % hold on
+    % errorbar(plotNames(1), rateStruct(1).rightBindRates, rateStruct(1).rightBindErrors, '.k', 'LineWidth', 2)
+    % for sample = 2:numSamples
+    %     bar(plotNames(sample), rateStruct(sample).rightBindRates(2), 'FaceColor', cmap(sample, :));
+    %     hold on
+    %     errorbar(plotNames(sample), rateStruct(sample).rightBindRates(2), rateStruct(sample).rightBindErrors(2), '.k', 'LineWidth', 2)
+    % end
+    % set(gca, 'FontWeight', 'bold', 'FontSize', 20, 'TickLabelInterpreter', 'tex', 'LineWidth', 3.3);
+    % ylabel('Rate (s^{-1})')
+    % title('Right Binding Fast Rates')
+    % saveas(gcf, 'plotRates/Brush_Right_Binding_Fast_Rates.png')
+
+    % % Slow Rates
+    % figure;
+    % bar(plotNames(1), rateStruct(1).rightBindRates, 'FaceColor', cmap(1, :));
+    % hold on
+    % errorbar(plotNames(1), rateStruct(1).rightBindRates, rateStruct(1).rightBindErrors, '.k', 'LineWidth', 2)
+    % for sample = 2:numSamples
+    %     bar(plotNames(sample), rateStruct(sample).rightBindRates(3), 'FaceColor', cmap(sample, :));
+    %     hold on
+    %     errorbar(plotNames(sample), rateStruct(sample).rightBindRates(3), rateStruct(sample).rightBindErrors(3), '.k', 'LineWidth', 2)
+    % end
+    % set(gca, 'FontWeight', 'bold', 'FontSize', 20, 'TickLabelInterpreter', 'tex', 'LineWidth', 3.3);
+    % ylabel('Rate (s^{-1})')
+    % title('Right Binding Slow Rates')
+    % saveas(gcf, 'plotRates/Brush_Right_Binding_Slow_Rates.png')
     
 end
 
@@ -1117,4 +1127,27 @@ function [] = sl2_call(varargin)
     for a =[S.ax2 S.ax3]
         legend(a)
     end
+end
+
+function plotRateBar(cmap, plotNames, rateStruct, field, plotTitle, savename)
+    figure;
+    bars = {};
+    bars{1} = bar(plotNames(1), getfield(rateStruct(1), field+"Rates"), 'FaceColor', cmap(1, :));
+    hold on
+    for sample = 2:4
+        barval = getfield(rateStruct(sample), field+"Rates");
+        bars{sample} = bar(plotNames(sample), [barval(2), barval(3)], 'FaceColor', cmap(sample, :));
+        hold on
+    end
+    errorbar(bars{1}.XEndPoints, getfield(rateStruct(1), field+"Rates"), getfield(rateStruct(1), field+"Errors"), '.k', 'LineWidth', 2)
+    for i = 2:4
+        barval = getfield(rateStruct(i), field+"Rates");
+        errorval = getfield(rateStruct(i), field+"Errors");
+        errorbar(bars{i}(1).XEndPoints, barval(2), errorval(2), '.k', 'LineWidth', 2)
+        errorbar(bars{i}(2).XEndPoints, barval(3), errorval(3), '.k', 'LineWidth', 2)
+    end
+    set(gca, 'FontWeight', 'bold', 'FontSize', 20, 'TickLabelInterpreter', 'tex', 'LineWidth', 3.3);
+    ylabel('Rate (s^{-1})')
+    title(plotTitle)
+    saveas(gcf, "plotRates/"+savename +".png")
 end
