@@ -12,7 +12,7 @@ secPerFrame = dualSecPerFrame;
 doExcludeTraces = 1;
 includeFastFlops = 1;
 plotDwellScatter = 0;
-doSliderPlot = 0;
+doSliderPlot = 1;
 plotIndividualCumSum = 0;
 plotTotalTimeHistograms = 0;
 cutoffFraction = 0.95;
@@ -23,12 +23,15 @@ plotNonMarkov = 0;
 plotSimpleRates = 0;
 numBins = 20;
 barPlots = 0;
-brushBarPlots = 1;
+brushBarPlots = 0;
 printHypothesisTest = 1;
 
-doPlotTraces = 0; % Plot a Selection of Traces?
-plotTraces = {[41],...
-    [1],[5],[12]};
+doPlotTraces = 1; % Plot a Selection of Traces?
+plotTraces = {[43],...
+    [1],[5],[33]};
+
+% plotTraces = {[41, 20],...
+%     [1, 4],[5, 8],[12, 16]};
 
 %% Loading Data
 dualData = {'0_0' '0_10' '30_0' '30_10';...
@@ -40,7 +43,7 @@ dualData = {'0_0' '0_10' '30_0' '30_10';...
 numSamples = size(dualData, 2);
 dualNames = {'0\_0', '0\_10', '30\_0', '30\_10'};
 for i=1:length(dualNames)
-    simpleDualDwells(i).name = dualNames(i);
+    simpleDualDwells(i).name = dualNames(i);    
     threeStateDwells(i).name = dualNames(i);
 end
 
@@ -157,9 +160,34 @@ if doPlotTraces
             seconds = 0:secPerFrame:(size(leftQuenchHMMSubset{trace}, 1)-1)*secPerFrame;
 
             % Prepare FRET traces
-            fretRaw = leftQuenchRawSubset{trace} ./ (rightQuenchRawSubset{trace} + leftQuenchRawSubset{trace});
-            fretHMM = leftQuenchHMMSubset{trace} ./ (rightQuenchHMMSubset{trace} + leftQuenchHMMSubset{trace});
-            midHMM = max(leftQuenchHMMSubset{trace}) / (max(rightQuenchHMMSubset{trace}) + max(leftQuenchHMMSubset{trace}));
+            % Old method of reading out "FRET" as Left/(Right + Left) 
+
+            % fretRaw = leftQuenchRawSubset{trace} ./ (rightQuenchRawSubset{trace} + leftQuenchRawSubset{trace});
+            % fretHMM = leftQuenchHMMSubset{trace} ./ (rightQuenchHMMSubset{trace} + leftQuenchHMMSubset{trace});
+            % midHMM = max(leftQuenchHMMSubset{trace}) / (max(rightQuenchHMMSubset{trace}) + max(leftQuenchHMMSubset{trace}));
+
+            % % Alternate "FRET" calculation
+            % leftNormRaw = (leftQuenchRawSubset{trace}-min(leftQuenchHMMSubset{trace}))./(max(leftQuenchHMMSubset{trace}) - min(leftQuenchHMMSubset{trace}));
+            % leftNormHMM = (leftQuenchHMMSubset{trace}-min(leftQuenchHMMSubset{trace}))./(max(leftQuenchHMMSubset{trace}) - min(leftQuenchHMMSubset{trace}));
+            % rightNormRaw = (rightQuenchRawSubset{trace}-min(rightQuenchHMMSubset{trace}))./(max(rightQuenchHMMSubset{trace}) - min(rightQuenchHMMSubset{trace}));
+            % rightNormHMM = (rightQuenchHMMSubset{trace}-min(rightQuenchHMMSubset{trace}))./(max(rightQuenchHMMSubset{trace}) - min(rightQuenchHMMSubset{trace}));
+            
+            % fretRaw = (leftNormRaw - rightNormRaw) ./ (leftNormRaw + rightNormRaw);
+            % fretHMM = (leftNormHMM - rightNormHMM) ./ (leftNormHMM + rightNormHMM);
+            % midHMM = (max(leftNormHMM) - max(rightNormHMM)) / (max(rightNormHMM) + max(leftNormHMM));
+
+            % Alternate Alternate "FRET" calculation
+            % Normalize each trace so that the AVERAGE high and low values are 1 and 0 respectively
+            % then take the difference (left - right)
+            leftNormRaw = (leftQuenchRawSubset{trace}-min(leftQuenchHMMSubset{trace}))./(max(leftQuenchHMMSubset{trace}) - min(leftQuenchHMMSubset{trace}));
+            leftNormHMM = (leftQuenchHMMSubset{trace}-min(leftQuenchHMMSubset{trace}))./(max(leftQuenchHMMSubset{trace}) - min(leftQuenchHMMSubset{trace}));
+            rightNormRaw = (rightQuenchRawSubset{trace}-min(rightQuenchHMMSubset{trace}))./(max(rightQuenchHMMSubset{trace}) - min(rightQuenchHMMSubset{trace}));
+            rightNormHMM = (rightQuenchHMMSubset{trace}-min(rightQuenchHMMSubset{trace}))./(max(rightQuenchHMMSubset{trace}) - min(rightQuenchHMMSubset{trace}));
+            
+            fretRaw = (leftNormRaw - rightNormRaw);
+            fretHMM = (leftNormHMM - rightNormHMM); 
+            midHMM = (max(leftNormHMM) - max(rightNormHMM));
+
 
             % Create figure
             plFig = figure('Position', [10 10 1310 900]);
@@ -212,7 +240,7 @@ if doPlotTraces
             xlabel('Time (s)', 'fontweight','bold','fontsize',14)
             tickvals = [min(fretHMM) midHMM max(fretHMM)];
             yticks(tickvals)
-            ylim([min(fretHMM)-.2 max(fretHMM)+.2])
+            ylim([min(fretRaw) max(fretRaw)])
             names = {'Left Bound'; 'Unbound'; 'Right Bound'};
             set(gca,'ytick',tickvals,'yticklabel',names, 'linewidth', 5, 'fontweight','bold', 'fontsize',20)
             legend off
