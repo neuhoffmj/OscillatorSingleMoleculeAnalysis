@@ -1059,9 +1059,19 @@ function [] = fret_slider_plot(leftRaw, leftHMM, rightRaw, rightHMM, dualHMM, se
     view(S.ax5, [90 -90])
 
 
-    fretRaw = leftRaw{1} ./ (rightRaw{1} + leftRaw{1});
-    fretHMM = leftHMM{1} ./ (rightHMM{1} + leftHMM{1});
-    midHMM = max(leftHMM{1}) / (max(rightHMM{1}) + max(leftHMM{1}));
+    % fretRaw = leftRaw{1} ./ (rightRaw{1} + leftRaw{1});
+    % fretHMM = leftHMM{1} ./ (rightHMM{1} + leftHMM{1});
+    % midHMM = max(leftHMM{1}) / (max(rightHMM{1}) + max(leftHMM{1}));
+
+    leftNormRaw = (leftRaw{1}-min(leftHMM{1}))./(max(leftHMM{1}) - min(leftHMM{1}));
+    leftNormHMM = (leftHMM{1}-min(leftHMM{1}))./(max(leftHMM{1}) - min(leftHMM{1}));
+    rightNormRaw = (rightRaw{1}-min(rightHMM{1}))./(max(rightHMM{1}) - min(rightHMM{1}));
+    rightNormHMM = (rightHMM{1}-min(rightHMM{1}))./(max(rightHMM{1}) - min(rightHMM{1}));
+
+    fretRaw = (leftNormRaw - rightNormRaw);
+    fretHMM = (leftNormHMM - rightNormHMM); 
+    midHMM = (max(leftNormHMM) - max(rightNormHMM));
+
 
     % Three State Composite Plot
     plot(S.ax1, seconds, fretRaw, '-','LineWidth', 1,'Color',[0 0 0], DisplayName="Dual Quenching Raw")
@@ -1070,7 +1080,7 @@ function [] = fret_slider_plot(leftRaw, leftHMM, rightRaw, rightHMM, dualHMM, se
     xlabel(S.ax1,'Time (s)')
     tickvals = [min(fretHMM) midHMM max(fretHMM)];
     yticks(S.ax1,tickvals)
-    ylim(S.ax1, [min(fretHMM)-.2 max(fretHMM)+.2])
+    ylim(S.ax1, [min(fretRaw) max(fretRaw)])
     names = {'Left Bound'; 'Unbound'; 'Right Bound'};
     set(S.ax1,'ytick',tickvals,'yticklabel',names)
     grid(S.ax1)
@@ -1131,9 +1141,18 @@ function [] = sl2_call(varargin)
     axis(S.ax5, 'off')
     view(S.ax5, [90 -90])
 
-    fretRaw = leftRaw{traceNum} ./ (rightRaw{traceNum} + leftRaw{traceNum});
-    fretHMM = leftHMM{traceNum} ./ (rightHMM{traceNum} + leftHMM{traceNum});
-    midHMM = max(leftHMM{traceNum}) / (max(rightHMM{traceNum}) + max(leftHMM{traceNum}));
+    % fretRaw = leftRaw{traceNum} ./ (rightRaw{traceNum} + leftRaw{traceNum});
+    % fretHMM = leftHMM{traceNum} ./ (rightHMM{traceNum} + leftHMM{traceNum});
+    % midHMM = max(leftHMM{traceNum}) / (max(rightHMM{traceNum}) + max(leftHMM{traceNum}));
+
+    leftNormRaw = (leftRaw{traceNum}-min(leftHMM{traceNum}))./(max(leftHMM{traceNum}) - min(leftHMM{traceNum}));
+    leftNormHMM = (leftHMM{traceNum}-min(leftHMM{traceNum}))./(max(leftHMM{traceNum}) - min(leftHMM{traceNum}));
+    rightNormRaw = (rightRaw{traceNum}-min(rightHMM{traceNum}))./(max(rightHMM{traceNum}) - min(rightHMM{traceNum}));
+    rightNormHMM = (rightHMM{traceNum}-min(rightHMM{traceNum}))./(max(rightHMM{traceNum}) - min(rightHMM{traceNum}));
+    
+    fretRaw = (leftNormRaw - rightNormRaw);
+    fretHMM = (leftNormHMM - rightNormHMM); 
+    midHMM = (max(leftNormHMM) - max(rightNormHMM));
 
     % Three State Composite Plot
     plot(S.ax1, seconds, fretRaw, '-','LineWidth', 1,'Color',[0 0 0], DisplayName="Dual Quenching Raw")
@@ -1142,7 +1161,7 @@ function [] = sl2_call(varargin)
     xlabel(S.ax1,'Time (s)')
     tickvals = [min(fretHMM) midHMM max(fretHMM)];
     yticks(S.ax1,tickvals)
-    ylim(S.ax1, [min(fretHMM)-.2 max(fretHMM)+.2])
+    ylim(S.ax1, [min(fretRaw) max(fretRaw)])
     names = {'Left Bound'; 'Unbound'; 'Right Bound'};
     set(S.ax1,'ytick',tickvals,'yticklabel',names)
     grid(S.ax1)
